@@ -23,7 +23,7 @@ $id_cliente = !empty($data['id_cliente']) ? $data['id_cliente'] : 22; // Default
 $id_empleado = $data['id_empleado'];
 $id_metodo_pago = $data['id_metodo_pago'];
 $descuento = $data['descuento'];
-$total_venta = $data['total'] - ($data['total'] * ($descuento / 100));
+$total_venta = $data['total'] - $descuento;
 $fecha = date('Y-m-d H:i:s');
 
 try {

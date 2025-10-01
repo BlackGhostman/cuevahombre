@@ -71,6 +71,10 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
                     <i class="fas fa-check-circle mr-2"></i>
                     Terminar Venta
                 </button>
+                <a href="../layout/inicio.php" class="w-full bg-slate-600 text-white font-bold py-3 rounded-lg mt-2 hover:bg-slate-700 transition-colors text-center block">
+                    <i class="fas fa-times-circle mr-2"></i>
+                    Cancelar Venta
+                </a>
             </div>
         </aside>
 
@@ -97,8 +101,8 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <!-- Descuento -->
                     <div>
-                        <label for="descuento" class="text-xs font-semibold text-slate-500 mb-1 block">Descuento (%)</label>
-                        <input type="number" id="descuento" value="0" min="0" max="100" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <label for="descuento" class="text-xs font-semibold text-slate-500 mb-1 block">Descuento</label>
+                        <input type="number" id="descuento" value="0" min="0" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
                     </div>
                     <!-- Método de Pago -->
                     <div>
@@ -237,8 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const updateTotals = () => {
         const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const discountPercentage = parseFloat(discountInput.value) || 0;
-        const discount = subtotal * (discountPercentage / 100);
+        const discount = parseFloat(discountInput.value) || 0;
         const total = subtotal - discount;
 
         subtotalEl.textContent = formatCurrency(subtotal);
