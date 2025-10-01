@@ -1,22 +1,17 @@
 
 
 
-<?php session_start();
 if(empty($_SESSION['id'])):
 endif;
 include('../../dist/includes/dbcon.php');
 
 		$cid = $_POST['id_usuario'];
-	$nombre = $_POST['nombre'];
-	
-	$apellido = $_POST['apellido'];
+	$nombre_completo = $_POST['nombre_completo'];
+	$tipo = $_POST['tipo'];
 	$usuario = $_POST['usuario'];
 
 
 	$correo = $_POST['correo'];
-
-
-	$telefono = $_POST['telefono'];
 
 if (!empty($_FILES['imagen']['name'])){
 	# code...
@@ -49,15 +44,13 @@ $target_dir = "../usuario/subir_us/";
 		$uploadok=0;
 	}
 	
-	
 
 		if(move_uploaded_file($_FILES["imagen"]["tmp_name"], $target_file)){
 			
 	$img=basename($_FILES["imagen"]["name"]);
 	
 
-
-	mysqli_query($con,"update usuario set usuario='$usuario',imagen='$img',nombre='$nombre',apellido='$apellido',telefono='$telefono',correo='$correo' where id='$cid'")or die(mysqli_error());
+	mysqli_query($con,"update usuario set usuario='$usuario',imagen='$img',nombre_completo='$nombre_completo',telefono='$telefono',tipo='$tipo',correo='$correo' where id='$cid'")or die(mysqli_error());
 
 	echo "<script type='text/javascript'>alert(' actualizado correctamente!');</script>";
 	echo "<script>document.location='usuario.php'</script>";			
@@ -71,13 +64,10 @@ $target_dir = "../usuario/subir_us/";
 else
 {
 
-	mysqli_query($con,"update usuario set usuario='$usuario',nombre='$nombre',apellido='$apellido',telefono='$telefono',correo='$correo' where id='$cid'")or die(mysqli_error());
+	mysqli_query($con,"update usuario set usuario='$usuario',nombre_completo='$nombre_completo',telefono='$telefono',tipo='$tipo',correo='$correo' where id='$cid'")or die(mysqli_error());
 
 	echo "<script type='text/javascript'>alert(' actualizado correctamente!');</script>";
 	echo "<script>document.location='usuario.php'</script>";	
-
-
-}
 	
 
 

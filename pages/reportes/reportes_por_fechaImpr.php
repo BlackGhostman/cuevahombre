@@ -103,28 +103,18 @@
 
 
 <?php
-  
 
- 
-
-
+$fecha_inicio = date('Y-m-d');
+$fecha_final = date('Y-m-d');
 if(isset($_POST['buscar_fechas']))
-
 {
   $fecha_inicio = $_POST['fecha_inicio'];
   $fecha_final = $_POST['fecha_final'];
-?>
-
-   <?php
-   
-   $id_sucursal;
-	 session_start();
-	 if (!isset($_SESSION['barberia'])) {
-		header('Location:../../index.php');
-	 }
-	 else{
-		$id_sucursal = $_SESSION['barberia'];
-
+  if (!isset($_SESSION['barberia'])) {
+    header('Location:../../index.php');
+  }
+  else{
+    $id_sucursal = $_SESSION['barberia'];
 
 	 }
  $MontoTotal ='';
@@ -155,7 +145,7 @@ $MontoTotal = $row['monto'];
 
 
 
-    $query=mysqli_query($con,"select p.id_pedido,p.fecha,u.nombre,ci.nombre as forma_pago,p.monto_pagado from pedidos AS p
+    $query=mysqli_query($con,"select p.id_pedido,p.fecha,u.nombre_completo as nombre,ci.nombre as forma_pago,p.monto_pagado from pedidos AS p
     INNER JOIN usuario AS u ON u.id = p.id_cliente 
     INNER JOIN categoria_ingresos as ci on ci.id_cat_ingresos = p.id_cat_ingresos 
     where  fecha >='$fecha_inicio' and fecha <='$fecha_final' and p.Id_Sucursal = $id_sucursal; ")or die(mysqli_error());

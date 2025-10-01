@@ -2,8 +2,7 @@
 session_start();
 include('../../dist/includes/dbcon.php');
 	//$branch=$_SESSION['branch'];
-	$nombre = $_POST['nombre'];
-	$apellido = $_POST['apellido'];
+	$nombre_completo = $_POST['nombre_completo'];
 	$usuario = $_POST['usuario'];
 	$password = $_POST['password'];
 	$password2 = $_POST['password2'];
@@ -70,8 +69,8 @@ $target_dir = "../usuario/subir_us/";
 		///finzalizo encriptacion
 
 
-			mysqli_query($con,"INSERT INTO usuario(usuario,password,imagen,tipo,nombre,apellido,telefono,correo)
-				VALUES('$usuario','$pass','$img','$tipo','$nombre','$apellido','$telefono','$correo')")or die(mysqli_error($con));
+			mysqli_query($con,"INSERT INTO usuario(usuario,password,imagen,tipo,nombre_completo,telefono,correo)
+				VALUES('$usuario','$pass','$img','$tipo','$nombre_completo','$telefono','$correo')")or die(mysqli_error($con));
 
 			
 			echo "<script>document.location='clientes.php'</script>";
@@ -93,8 +92,8 @@ else{
 		$pass=$salt.$pass;
 
 
-			mysqli_query($con,"INSERT INTO usuario(usuario,password,imagen,tipo,nombre,apellido,telefono,correo)
-				VALUES('$usuario','$pass','','$tipo','$nombre','$apellido','$telefono','$correo')")or die(mysqli_error($con));
+			mysqli_query($con,"INSERT INTO usuario(usuario,password,imagen,tipo,nombre_completo,telefono,correo)
+				VALUES('$usuario','$pass','','$tipo','$nombre_completo','$telefono','$correo')")or die(mysqli_error($con));
 
 			
 			echo "<script>document.location='clientes.php'</script>";

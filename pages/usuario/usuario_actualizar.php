@@ -7,9 +7,8 @@ endif;
 include('../../dist/includes/dbcon.php');
 
 		$cid = $_POST['id_usuario'];
-	$nombre = $_POST['nombre'];
+	$nombre_completo = $_POST['nombre_completo'];
 	$tipo = $_POST['tipo'];
-	$apellido = $_POST['apellido'];
 	$usuario = $_POST['usuario'];
 
 
@@ -57,7 +56,7 @@ $target_dir = "subir_us/";
 	
 
 
-	mysqli_query($con,"update usuario set usuario='$usuario',imagen='$img',nombre='$nombre',apellido='$apellido',telefono='$telefono',tipo='$tipo',correo='$correo' where id='$cid'")or die(mysqli_error());
+	mysqli_query($con,"update usuario set usuario='$usuario',imagen='$img',nombre_completo='$nombre_completo',telefono='$telefono',tipo='$tipo',correo='$correo' where id='$cid'")or die(mysqli_error());
 
 	echo "<script type='text/javascript'>alert(' actualizado correctamente!');</script>";
 	echo "<script>document.location='usuario.php'</script>";			
@@ -71,7 +70,7 @@ $target_dir = "subir_us/";
 else
 {
 
-	mysqli_query($con,"update usuario set usuario='$usuario',nombre='$nombre',apellido='$apellido',telefono='$telefono',tipo='$tipo',correo='$correo' where id='$cid'")or die(mysqli_error());
+	mysqli_query($con,"update usuario set usuario='$usuario',nombre_completo='$nombre_completo',telefono='$telefono',tipo='$tipo',correo='$correo' where id='$cid'")or die(mysqli_error());
 
 	echo "<script type='text/javascript'>alert(' actualizado correctamente!');</script>";
 	echo "<script>document.location='usuario.php'</script>";	

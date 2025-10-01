@@ -146,33 +146,14 @@ ul {
      <div class="row">
                     <div class="col-md-3 btn-print">
                       <div class="form-group">
-                        <label for="date" >Nombre</label>
+                        <label for="date" >Nombre completo</label>
                  
                       </div><!-- /.form group -->
                     </div>
                        <div class="col-md-4 btn-print">
                       <div class="form-group">
 
-            <input type="text" class="form-control" id="name" name="nombre" value="<?php echo $row['nombre'];?>" required>
-                      </div>
-                    </div>
-                           <div class="col-md-4 btn-print">
-                
-                    </div>
-                    </div>
-
-
-     <div class="row">
-                    <div class="col-md-3 btn-print">
-                      <div class="form-group">
-                        <label for="date" >Apellido</label>
-                 
-                      </div><!-- /.form group -->
-                    </div>
-                       <div class="col-md-4 btn-print">
-                      <div class="form-group">
-
-        <input type="text" class="form-control" id="apellido" name="apellido" value="<?php echo $row['apellido'];?>"   required>
+            <input type="text" class="form-control" id="name" name="nombre_completo" value="<?php echo $row['nombre_completo'];?>" required>
                       </div>
                     </div>
                            <div class="col-md-4 btn-print">

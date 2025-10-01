@@ -102,7 +102,6 @@ ul {
                            <div class="col-md-4 btn-print">
                 
                     </div>
-                    </div>
 
                    <div class="row">
                     <div class="col-md-3 btn-print">
@@ -114,24 +113,7 @@ ul {
                        <div class="col-md-4 btn-print">
                       <div class="form-group">
 
-                          <input type="text" class="form-control pull-right" id="date" name="nombre" required >
-                      </div>
-                    </div>
-                           <div class="col-md-4 btn-print">
-                
-                    </div>
-                    </div>
-       
-                          <div class="row">
-                    <div class="col-md-3 btn-print">
-                      <div class="form-group">
-                        <label for="date" >Cumpleaños</label>
-                 
-                      </div><!-- /.form group -->
-                    </div>
-                       <div class="col-md-4 btn-print">
-                      <div class="form-group">
-                          <input type="text" class="form-control pull-right" id="date" name="apellido" required >
+                          <input type="text" class="form-control pull-right" id="date" name="nombre_completo" required >
                       </div>
                     </div>
                            <div class="col-md-4 btn-print">

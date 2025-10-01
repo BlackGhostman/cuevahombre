@@ -60,9 +60,9 @@
                         <select class="form-control select2" style="width: 200px;"  id="tbBarbero" name="tbBarbero" required>
                             <option value="">Seleccione:</option>
                             <?php          
-                              $query = mysqli_query($con,"SELECT * FROM usuario where tipo in('empleado','administrador')")or die(mysqli_error());
-                              while ($valores= mysqli_fetch_array($query)) {
-                                echo '<option value='.$valores[id].'>'.$valores[nombre].'</option>';
+                              $query = mysqli_query($con,"SELECT id, nombre_completo FROM usuario where tipo in('empleado','administrador')")or die(mysqli_error());
+                              while ($valores = mysqli_fetch_array($query)) {
+                                echo "<option value='{$valores['id']}'>{$valores['nombre_completo']}</option>";
 
 
                               }
@@ -139,12 +139,12 @@ if(isset($_POST['buscar_fechas']))
 
    <?php
  $Sumatoria = 0;
-    $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,u.nombre , pr.precio_venta - p.Descuento as monto, p.Descuento FROM pedidos p
+    $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,u.nombre_completo as nombre , pr.precio_venta - p.Descuento as monto, p.Descuento FROM pedidos p
                               INNER JOIN detalles_pedido dp on dp.id_pedido = p.id_pedido
                               INNER JOIN producto pr on pr.id_pro = dp.id_producto
                               INNER JOIN usuario u on u.id = p.id_cliente
                               WHERE p.fecha BETWEEN '$fecha_inicio' AND '$fecha_final' and pr.estado = 'd' and p.id_empleado = $Barbero
-                              order by p.id_pedido DESC;")or die(mysqli_error());
+                              order by p.id_pedido DESC")or die(mysqli_error());
     $contador=0;
     while($row=mysqli_fetch_array($query)){
       $Sumatoria = $Sumatoria + $row['monto'];
@@ -171,12 +171,12 @@ $contador++;
 
                 
                 
-                  $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,u.nombre, pr.precio_venta - p.Descuento as monto, p.Descuento FROM pedidos p
+                  $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,u.nombre_completo as nombre, pr.precio_venta - p.Descuento as monto, p.Descuento FROM pedidos p
                                             INNER JOIN detalles_pedido dp on dp.id_pedido = p.id_pedido
                                             INNER JOIN producto pr on pr.id_pro = dp.id_producto
                                             INNER JOIN usuario u on u.id = p.id_cliente
                                             WHERE p.fecha BETWEEN '$fecha_inicio' AND '$fecha_final' and pr.estado = 'd' and p.id_empleado = $Barbero
-                  order by p.id_pedido DESC;")or die(mysqli_error());
+                  order by p.id_pedido DESC")or die(mysqli_error());
                   $i=1;
                   while($row=mysqli_fetch_array($query)){
                     $num_pedido=$row['id_pedido'];
