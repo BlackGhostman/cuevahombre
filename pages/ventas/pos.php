@@ -41,7 +41,7 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body class="bg-slate-100 text-slate-800">
 
-    <div class="flex flex-col lg:flex-row h-screen">
+    <div class="flex flex-col lg:flex-row lg:h-screen">
 
         <!-- Columna Izquierda: Resumen de la Venta -->
         <aside class="w-full lg:w-1/3 xl:w-1/4 bg-white p-6 flex flex-col shadow-lg">
@@ -75,7 +75,7 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
         </aside>
 
         <!-- Columna Derecha: Productos y Controles -->
-        <main class="w-full lg:w-2/3 xl:w-3/4 p-6 flex flex-col">
+        <main class="w-full lg:w-2/3 xl:w-3/4 p-6 flex flex-col overflow-y-auto custom-scrollbar">
             <div class="bg-white rounded-xl shadow-md p-4 mb-6">
                 <h1 class="text-2xl font-bold text-teal-600 mb-4">Panel de Ventas</h1>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
