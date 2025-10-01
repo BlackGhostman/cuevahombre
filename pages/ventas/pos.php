@@ -67,6 +67,19 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
                     <span>Total:</span>
                     <span id="total">₡ 0</span>
                 </div>
+
+                <!-- Campos de Efectivo -->
+                <div id="efectivo-fields" class="hidden grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label for="paga-con" class="text-sm font-medium text-slate-600">Paga con:</label>
+                        <input type="number" id="paga-con" min="0" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 mt-1">
+                    </div>
+                    <div>
+                        <label for="vuelto" class="text-sm font-medium text-slate-600">Vuelto:</label>
+                        <input type="text" id="vuelto" class="w-full p-2 border rounded-lg bg-slate-200 cursor-not-allowed mt-1" readonly>
+                    </div>
+                </div>
+
                 <button id="complete-sale-btn" class="w-full bg-teal-500 text-white font-bold py-3 rounded-lg mt-6 hover:bg-teal-600 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed">
                     <i class="fas fa-check-circle mr-2"></i>
                     Terminar Venta
@@ -82,38 +95,42 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
         <main class="w-full lg:w-2/3 xl:w-3/4 p-6 flex flex-col overflow-y-auto custom-scrollbar">
             <div class="bg-white rounded-xl shadow-md p-4 mb-6">
                 <h1 class="text-2xl font-bold text-teal-600 mb-4">Panel de Ventas</h1>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Seleccionar Cliente -->
-                    <div class="relative">
-                        <label for="cliente" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Cliente</label>
-                        <i class="fas fa-user absolute left-3 top-9 text-slate-400"></i>
-                        <input type="text" id="cliente" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" readonly>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+                    <!-- Contenedor principal de campos -->
+                    <div class="md:col-span-2 lg:col-span-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Seleccionar Cliente -->
+                        <div class="relative">
+                            <label for="cliente" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Cliente</label>
+                            <i class="fas fa-user absolute left-3 top-9 text-slate-400"></i>
+                            <input type="text" id="cliente" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" readonly>
+                        </div>
+                        <!-- Seleccionar Barbero -->
+                        <div>
+                            <label for="barbero" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Barbero</label>
+                            <select id="barbero" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($barberos as $barbero): ?>
+                                    <option value="<?php echo htmlspecialchars($barbero['id']); ?>"><?php echo htmlspecialchars($barbero['nombre']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <!-- Descuento -->
+                        <div>
+                            <label for="descuento" class="text-xs font-semibold text-slate-500 mb-1 block">Descuento</label>
+                            <input type="number" id="descuento" value="0" min="0" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <!-- Método de Pago -->
+                        <div>
+                            <label for="metodo-pago" class="text-xs font-semibold text-slate-500 mb-1 block">Método de Pago</label>
+                            <select id="metodo-pago" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                                <option value="">Seleccione...</option>
+                                <?php foreach ($metodos_pago as $metodo): ?>
+                                    <option value="<?php echo htmlspecialchars($metodo['id_cat_ingresos']); ?>"><?php echo htmlspecialchars($metodo['nombre']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
-                    <!-- Seleccionar Barbero -->
-                    <div>
-                        <label for="barbero" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Barbero</label>
-                        <select id="barbero" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
-                            <option value="">Seleccione...</option>
-                            <?php foreach ($barberos as $barbero): ?>
-                                <option value="<?php echo htmlspecialchars($barbero['id']); ?>"><?php echo htmlspecialchars($barbero['nombre']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <!-- Descuento -->
-                    <div>
-                        <label for="descuento" class="text-xs font-semibold text-slate-500 mb-1 block">Descuento</label>
-                        <input type="number" id="descuento" value="0" min="0" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
-                    </div>
-                    <!-- Método de Pago -->
-                    <div>
-                        <label for="metodo-pago" class="text-xs font-semibold text-slate-500 mb-1 block">Método de Pago</label>
-                        <select id="metodo-pago" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
-                            <option value="">Seleccione...</option>
-                             <?php foreach ($metodos_pago as $metodo): ?>
-                                <option value="<?php echo htmlspecialchars($metodo['id_cat_ingresos']); ?>"><?php echo htmlspecialchars($metodo['nombre']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+
                 </div>
             </div>
 
@@ -218,6 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const newClienteNameInput = document.getElementById('new-cliente-name');
     const newClienteTelefonoInput = document.getElementById('new-cliente-telefono');
     const newClienteCumpleanosInput = document.getElementById('new-cliente-cumpleanos');
+
+    const metodoPagoSelect = document.getElementById('metodo-pago');
+    const efectivoFields = document.getElementById('efectivo-fields');
+    const pagaConInput = document.getElementById('paga-con');
+    const vueltoInput = document.getElementById('vuelto');
 
     const formatCurrency = (number) => {
         return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(number);
@@ -343,6 +365,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', filterProducts);
     discountInput.addEventListener('input', updateTotals);
+
+    metodoPagoSelect.addEventListener('change', () => {
+        const selectedOption = metodoPagoSelect.options[metodoPagoSelect.selectedIndex].text;
+        if (selectedOption.toLowerCase() === 'efectivo') {
+            efectivoFields.classList.remove('hidden');
+        } else {
+            efectivoFields.classList.add('hidden');
+            pagaConInput.value = '';
+            vueltoInput.value = '';
+        }
+    });
+
+    pagaConInput.addEventListener('input', () => {
+        const pagaCon = parseFloat(pagaConInput.value) || 0;
+        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0) - (parseFloat(discountInput.value) || 0);
+        const vuelto = pagaCon - total;
+
+        if (pagaCon > 0) {
+            vueltoInput.value = formatCurrency(vuelto > 0 ? vuelto : 0);
+        } else {
+            vueltoInput.value = '';
+        }
+    });
 
     // --- Lógica de la Modal de Cliente ---
     clienteInput.addEventListener('click', () => {
