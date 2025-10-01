@@ -364,7 +364,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     searchInput.addEventListener('input', filterProducts);
-    discountInput.addEventListener('input', updateTotals);
+    discountInput.addEventListener('input', () => {
+        updateTotals();
+        calculateChange();
+    });
 
     metodoPagoSelect.addEventListener('change', () => {
         const selectedOption = metodoPagoSelect.options[metodoPagoSelect.selectedIndex].text;
@@ -377,17 +380,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    pagaConInput.addEventListener('input', () => {
+    const calculateChange = () => {
         const pagaCon = parseFloat(pagaConInput.value) || 0;
-        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0) - (parseFloat(discountInput.value) || 0);
+        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const discount = parseFloat(discountInput.value) || 0;
+        const total = subtotal - discount;
         const vuelto = pagaCon - total;
 
         if (pagaCon > 0) {
-            vueltoInput.value = formatCurrency(vuelto > 0 ? vuelto : 0);
+            vueltoInput.value = formatCurrency(vuelto >= 0 ? vuelto : 0);
         } else {
             vueltoInput.value = '';
         }
-    });
+    };
+
+    pagaConInput.addEventListener('input', calculateChange);
 
     // --- Lógica de la Modal de Cliente ---
     clienteInput.addEventListener('click', () => {
