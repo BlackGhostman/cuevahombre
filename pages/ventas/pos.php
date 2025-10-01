@@ -87,7 +87,7 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
                     <div class="relative">
                         <label for="cliente" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Cliente</label>
                         <i class="fas fa-user absolute left-3 top-9 text-slate-400"></i>
-                        <input type="text" id="cliente" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <input type="text" id="cliente" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" readonly>
                     </div>
                     <!-- Seleccionar Barbero -->
                     <div>
@@ -142,6 +142,18 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <!-- Modal de Búsqueda de Cliente -->
+    <div id="cliente-search-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-4">Buscar Cliente</h3>
+            <input type="text" id="cliente-modal-search" placeholder="Escriba para buscar..." class="w-full pl-4 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4">
+            <div id="cliente-modal-results" class="overflow-y-auto h-64 custom-scrollbar">
+                <!-- Resultados de la búsqueda aquí -->
+            </div>
+            <button id="close-cliente-modal-btn" class="mt-6 bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors">Cerrar</button>
+        </div>
+    </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -166,6 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const completeSaleBtn = document.getElementById('complete-sale-btn');
     const notificationModal = document.getElementById('notification-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
+    const clienteInput = document.getElementById('cliente');
+    const clienteSearchModal = document.getElementById('cliente-search-modal');
+    const closeClienteModalBtn = document.getElementById('close-cliente-modal-btn');
+    const clienteModalSearchInput = document.getElementById('cliente-modal-search');
+    const clienteModalResults = document.getElementById('cliente-modal-results');
+    let selectedClientId = null;
 
     const formatCurrency = (number) => {
         return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(number);
@@ -281,7 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetSale = () => {
         cart = [];
         discountInput.value = 0;
-        document.getElementById('cliente').value = '';
+        clienteInput.value = '';
+        selectedClientId = null;
         document.getElementById('barbero').value = '';
         document.getElementById('metodo-pago').value = '';
         renderCart();
@@ -290,6 +309,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('input', filterProducts);
     discountInput.addEventListener('input', updateTotals);
+
+    // --- Lógica de la Modal de Cliente ---
+    clienteInput.addEventListener('click', () => {
+        clienteSearchModal.classList.remove('hidden');
+        clienteModalSearchInput.focus();
+        searchClients(''); // Búsqueda inicial para mostrar todos los clientes
+    });
+
+    closeClienteModalBtn.addEventListener('click', () => {
+        clienteSearchModal.classList.add('hidden');
+    });
+
+    clienteModalSearchInput.addEventListener('input', () => {
+        searchClients(clienteModalSearchInput.value);
+    });
+
+    const searchClients = (term) => {
+        fetch(`buscar_clientes.php?term=${encodeURIComponent(term)}`)
+            .then(response => response.json())
+            .then(data => {
+                clienteModalResults.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(client => {
+                        const clientDiv = document.createElement('div');
+                        clientDiv.className = 'p-2 hover:bg-slate-100 cursor-pointer rounded';
+                        clientDiv.textContent = client.nombre;
+                        clientDiv.dataset.id = client.id;
+                        clientDiv.addEventListener('click', () => {
+                            clienteInput.value = client.nombre;
+                            selectedClientId = client.id;
+                            clienteSearchModal.classList.add('hidden');
+                        });
+                        clienteModalResults.appendChild(clientDiv);
+                    });
+                } else {
+                    clienteModalResults.innerHTML = '<p class="text-slate-500">No se encontraron clientes.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error al buscar clientes:', error);
+                clienteModalResults.innerHTML = '<p class="text-red-500">Error al cargar los clientes.</p>';
+            });
+    };
 
     cartItemsContainer.addEventListener('click', (e) => {
         const button = e.target.closest('.quantity-change');
@@ -307,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cart: cart,
             total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
             descuento: parseFloat(discountInput.value) || 0,
-            id_cliente: document.getElementById('cliente').value, // Needs a proper customer selection implementation
+            id_cliente: selectedClientId,
             id_empleado: document.getElementById('barbero').value,
             id_metodo_pago: document.getElementById('metodo-pago').value,
         };
