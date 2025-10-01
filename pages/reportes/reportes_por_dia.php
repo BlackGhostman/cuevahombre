@@ -136,7 +136,7 @@ $contador++;
  <?php
 
 
-    $query=mysqli_query($con,"select * from pedidos AS p
+    $query=mysqli_query($con,"select p.id_pedido, p.fecha, u.nombre_completo from pedidos AS p
 INNER JOIN usuario AS u
     ON u.id = p.id_cliente  where  fecha ='$fecha' ")or die(mysqli_error());
     $i=1;
@@ -146,9 +146,9 @@ INNER JOIN usuario AS u
 ?>
 
                       <tr >
-                            <td><?php echo $row['id'];?></td>
+                            <td><?php echo $row['id_pedido'];?></td>
 <td><?php echo $row['fecha'];?></td>
-              <td><?php echo $row['nombre'].'  '.$row['apellido'];?></td>
+              <td><?php echo $row['nombre_completo'];?></td>
 
                                         <td>
                                  <?php

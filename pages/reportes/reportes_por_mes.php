@@ -155,19 +155,19 @@ $contador++;
 
 
 
-    $query=mysqli_query($con,"select * from pedidos AS p
+    $query=mysqli_query($con,"select p.id_pedido, p.fecha, u.nombre_completo from pedidos AS p
 INNER JOIN usuario AS u
     ON u.id = p.id_cliente  where  MONTH(fecha)='$mes' ")or die(mysqli_error());
     $i=1;
     while($row=mysqli_fetch_array($query)){
-      $num_pedido=$row['num_pedido'];
+      $num_pedido=$row['id_pedido'];
 
 ?>
 
                       <tr >
-                              <td><?php echo $row['id'];?></td>
+                              <td><?php echo $row['id_pedido'];?></td>
 <td><?php echo $row['fecha'];?></td>
-              <td><?php echo $row['nombre'].'  '.$row['apellido'];?></td>
+              <td><?php echo $row['nombre_completo'];?></td>
                                                       <td>
                                  <?php
                    

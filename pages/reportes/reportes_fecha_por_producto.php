@@ -120,16 +120,15 @@ if(isset($_POST['buscar_fechas']))
 {
   $fecha_inicio = $_POST['fecha_inicio'];
   $fecha_final = $_POST['fecha_final'];
-  $Barbero = $_POST['tbBarbero'];
 ?>
 
    <?php
  $Sumatoria = 0;
-    $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,pr.nombre_pro as producto,u.nombre,p.monto_pagado, pr.precio_venta, pr.precio_compra,pr.precio_venta - pr.precio_compra as ganancia FROM pedidos p
+    $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,pr.nombre_pro as producto,u.nombre_completo as nombre,p.monto_pagado, pr.precio_venta, pr.precio_compra,pr.precio_venta - pr.precio_compra as ganancia FROM pedidos p
                               INNER JOIN detalles_pedido dp on dp.id_pedido = p.id_pedido
                               INNER JOIN producto pr on pr.id_pro = dp.id_producto
                               INNER JOIN usuario u on u.id = p.id_cliente
-                              WHERE p.fecha BETWEEN '$fecha_inicio' AND '$fecha_final' and pr.estado = 'a';")or die(mysqli_error());
+                              WHERE p.fecha BETWEEN '$fecha_inicio' AND '$fecha_final' and pr.estado = 'a'")or die(mysqli_error());
     $contador=0;
     while($row=mysqli_fetch_array($query)){
       $Sumatoria = $Sumatoria + $row['precio_venta'];
@@ -156,11 +155,11 @@ $contador++;
 
                 
                 
-                  $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,pr.nombre_pro as producto,u.nombre,p.monto_pagado, pr.precio_venta, pr.precio_compra,pr.precio_venta - pr.precio_compra as ganancia FROM pedidos p
+                  $query=mysqli_query($con,"SELECT p.id_pedido, p.fecha,pr.nombre_pro as producto,u.nombre_completo as nombre,p.monto_pagado, pr.precio_venta, pr.precio_compra,pr.precio_venta - pr.precio_compra as ganancia FROM pedidos p
                                             INNER JOIN detalles_pedido dp on dp.id_pedido = p.id_pedido
                                             INNER JOIN producto pr on pr.id_pro = dp.id_producto
                                             INNER JOIN usuario u on u.id = p.id_cliente
-                                            WHERE p.fecha BETWEEN '$fecha_inicio' AND '$fecha_final' and pr.estado = 'a';")or die(mysqli_error());
+                                            WHERE p.fecha BETWEEN '$fecha_inicio' AND '$fecha_final' and pr.estado = 'a'")or die(mysqli_error());
                   $i=1;
                   while($row=mysqli_fetch_array($query)){
                     $num_pedido=$row['id_pedido'];
