@@ -13,9 +13,9 @@ $acumulado=0;
 		$id_sucursal = $_SESSION['barberia'];
 	}
 
-	$query_usuario=mysqli_query($con,"select nombre, imagen from usuario where id ='".$_SESSION['id']."'")or die(mysqli_error());
+	$query_usuario=mysqli_query($con,"select nombre_completo, imagen from usuario where id ='" . $_SESSION['id'] . "'")or die(mysqli_error());
     $row_usuario=mysqli_fetch_array($query_usuario);
-    $nombre = $row_usuario['nombre'];
+    $nombre = $row_usuario['nombre_completo'];
     $imagen = $row_usuario['imagen'];
 
     $query_empresa=mysqli_query($con,"select simbolo_moneda from empresa")or die(mysqli_error());

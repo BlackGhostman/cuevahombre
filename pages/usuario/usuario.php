@@ -138,7 +138,7 @@ ul {
 
 <td><?php echo $i;?></td>
  <td><IMG src="subir_us/<?php echo $row['imagen'];?>" style="height:50PX" /></td>
-              <td><?php echo $row['nombre'].'  '.$row['apellido'];?></td>
+              <td><?php echo $row['nombre_completo'];?></td>
 <td><?php echo $row['telefono'];?></td>
 <td><?php echo $row['usuario'];?></td>
   <td><?php echo $row['tipo'];?></td>      

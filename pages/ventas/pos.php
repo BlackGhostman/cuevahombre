@@ -13,7 +13,7 @@ $query_productos = $base_de_datos->query("SELECT id_pro, nombre_pro, precio_vent
 $productos = $query_productos->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch barbers
-$query_barberos = $base_de_datos->query("SELECT id, nombre FROM usuario WHERE tipo IN ('empleado', 'administrador')");
+$query_barberos = $base_de_datos->query("SELECT id, nombre_completo AS nombre FROM usuario WHERE tipo IN ('empleado', 'administrador')");
 $barberos = $query_barberos->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch payment methods
@@ -150,7 +150,33 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
             <div id="cliente-modal-results" class="overflow-y-auto h-64 custom-scrollbar">
                 <!-- Resultados de la búsqueda aquí -->
             </div>
-            <button id="close-cliente-modal-btn" class="mt-6 bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors">Cerrar</button>
+            <div class="flex justify-between items-center mt-6">
+                <button id="open-create-cliente-modal-btn" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors">Crear Nuevo Cliente</button>
+                <button id="close-cliente-modal-btn" class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Creación de Cliente -->
+    <div id="cliente-create-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 shadow-xl w-full max-w-md">
+            <h3 class="text-2xl font-bold mb-4">Crear Nuevo Cliente</h3>
+            <div class="mb-4">
+                <label for="new-cliente-name" class="block text-sm font-medium text-slate-700">Nombre del Cliente</label>
+                <input type="text" id="new-cliente-name" placeholder="Nombre completo" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+            </div>
+            <div class="mb-4">
+                <label for="new-cliente-telefono" class="block text-sm font-medium text-slate-700">Teléfono</label>
+                <input type="text" id="new-cliente-telefono" placeholder="Número de teléfono" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+            </div>
+            <div class="mb-4">
+                <label for="new-cliente-cumpleanos" class="block text-sm font-medium text-slate-700">Cumpleaños</label>
+                <input type="date" id="new-cliente-cumpleanos" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500">
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button id="save-cliente-btn" class="bg-teal-500 text-white px-6 py-2 rounded-lg hover:bg-teal-600 transition-colors">Guardar Cliente</button>
+                <button id="close-create-cliente-modal-btn" class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors">Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -184,6 +210,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const clienteModalSearchInput = document.getElementById('cliente-modal-search');
     const clienteModalResults = document.getElementById('cliente-modal-results');
     let selectedClientId = null;
+
+    const clienteCreateModal = document.getElementById('cliente-create-modal');
+    const openCreateClienteModalBtn = document.getElementById('open-create-cliente-modal-btn');
+    const closeCreateClienteModalBtn = document.getElementById('close-create-cliente-modal-btn');
+    const saveClienteBtn = document.getElementById('save-cliente-btn');
+    const newClienteNameInput = document.getElementById('new-cliente-name');
+    const newClienteTelefonoInput = document.getElementById('new-cliente-telefono');
+    const newClienteCumpleanosInput = document.getElementById('new-cliente-cumpleanos');
 
     const formatCurrency = (number) => {
         return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(number);
@@ -352,6 +386,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 clienteModalResults.innerHTML = '<p class="text-red-500">Error al cargar los clientes.</p>';
             });
     };
+
+    // --- Lógica de la Modal de Creación de Cliente ---
+    openCreateClienteModalBtn.addEventListener('click', () => {
+        clienteSearchModal.classList.add('hidden');
+        clienteCreateModal.classList.remove('hidden');
+        newClienteNameInput.focus();
+    });
+
+    closeCreateClienteModalBtn.addEventListener('click', () => {
+        clienteCreateModal.classList.add('hidden');
+    });
+
+    saveClienteBtn.addEventListener('click', () => {
+        const newName = newClienteNameInput.value.trim();
+        if (newName === '') {
+            alert('Por favor, ingrese un nombre para el cliente.');
+            return;
+        }
+
+        const newTelefono = newClienteTelefonoInput.value.trim();
+        const newCumpleanos = newClienteCumpleanosInput.value;
+
+        fetch('crear_cliente.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                nombre: newName,
+                telefono: newTelefono,
+                cumpleanos: newCumpleanos
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                clienteInput.value = data.nombre;
+                selectedClientId = data.id;
+                clienteCreateModal.classList.add('hidden');
+                newClienteNameInput.value = '';
+                newClienteTelefonoInput.value = '';
+                newClienteCumpleanosInput.value = '';
+            } else {
+                alert('Error al crear el cliente: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error de conexión al crear el cliente.');
+        });
+    });
 
     cartItemsContainer.addEventListener('click', (e) => {
         const button = e.target.closest('.quantity-change');
