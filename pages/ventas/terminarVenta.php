@@ -1,7 +1,7 @@
 <?php
 echo '<link rel="stylesheet" href="../ventas/css/factura.css">';
 if(!isset($_POST["total"])) exit;
-include('../layout/dbcon.php');
+include('../php/conexion.php');
 date_default_timezone_set("America/Costa_Rica");
 
 session_start();
@@ -79,7 +79,8 @@ foreach ($_SESSION["carrito"] as $producto) {
 //	$total += $producto->carrito;
 	$sentencia->execute([$id_pedido, $producto->id_producto, $producto->cantidad, $id_cliente,$fecha]);
 
-			$update=mysqli_query($con,"update producto set stock=stock-'$producto->cantidad' where id_pro='$producto->id_producto' ");
+			$sentencia_update = $base_de_datos->prepare("UPDATE producto SET stock = stock - ? WHERE id_pro = ?;");
+			$sentencia_update->execute([$producto->cantidad, $producto->id_producto]);
 
 			echo '<tr ><td>' . $producto->cantidad . '</td> <td>' . $producto->nombre . '</td> <td>¢' . $producto->total . '</td></tr>';
 
@@ -116,9 +117,9 @@ else{
 */
 
 
-            $update=mysqli_query($con,"CALL ActualizarMontosCaja ($monto_pagado,$id_sucursal)");
+            $sentencia_caja = $base_de_datos->prepare("CALL ActualizarMontosCaja(?, ?);");
+            $sentencia_caja->execute([$monto_pagado, $id_sucursal]);
 
-			/*$update=mysqli_query($con,"update caja set monto=monto+$monto_pagado   where estado='abierto' and id_Sucursal = $id_sucursal");*/
 			echo '<script type="text/javascript"> window.print(); </script>';
 			echo '<script type="text/javascript"> setTimeout("ir()",20000); </script>';
   echo "<script>

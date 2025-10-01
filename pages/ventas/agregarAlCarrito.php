@@ -1,6 +1,7 @@
 
 <?php
-include('../layout/dbcon.php');
+session_start();
+include('../php/conexion.php');
 if (!isset($_POST["id_producto"])) {
     return;
 }
@@ -31,7 +32,6 @@ if ($producto->stock < 1) {
             echo "<script>document.location='../ventas/pos.php?status=5'</script>";
     exit;
 }
-session_start();
 # Buscar producto dentro del cartito
 $indice = false;
 for ($i = 0; $i < count($_SESSION["carrito"]); $i++) {
