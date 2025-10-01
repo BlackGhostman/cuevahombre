@@ -1,669 +1,351 @@
- <?php include '../php/conexion.php';?>
+ <?php
+include '../php/conexion.php';
 
-<?php 
+@session_start();
 
-date_default_timezone_set("America/Costa_Rica");
- @session_start();
-
-
-if (isset($_SESSION['id'])){
-
-
-}else{
-header('Location:../../index.php');
+if (!isset($_SESSION['id'])) {
+    header('Location:../../index.php');
+    exit();
 }
 
+// Fetch products
+$query_productos = $base_de_datos->query("SELECT id_pro, nombre_pro, precio_venta, stock, imagen FROM producto WHERE stock > 0 AND estado IN ('a', 'd')");
+$productos = $query_productos->fetchAll(PDO::FETCH_ASSOC);
 
+// Fetch barbers
+$query_barberos = $base_de_datos->query("SELECT id, nombre FROM usuario WHERE tipo IN ('empleado', 'administrador')");
+$barberos = $query_barberos->fetchAll(PDO::FETCH_ASSOC);
 
-//$idusuario=$_SESSION["idusuario"];
-   $fechaactual = date('Y-m-d');
+// Fetch payment methods
+$query_metodos_pago = $base_de_datos->query("SELECT id_cat_ingresos, nombre FROM categoria_ingresos");
+$metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
 
-$porcentaje_impuesto=0;
-$simbolo_moneda="";
-       $query=$base_de_datos->query("select * from empresa");
-    $i=1;
-    while($row=$query->fetch(PDO::FETCH_ASSOC)){
- //   $porcentaje_impuesto=$row['impuesto'];
-      $simbolo_moneda=$row['simbolo_moneda'];
-}
-
-?>
-
-  <?php
-
-
-    $id_sesion=$_SESSION['id']; 
-    
 ?>
 <!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="../ventas/css/styles.css">
-
-    <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#key').on('keyup', function() {
-            var key = $(this).val();        
-            var dataString = 'key='+key;
-        $.ajax({
-                type: "POST",
-                url: "ajax.php",
-                data: dataString,
-                success: function(data) {
-                    //Escribimos las sugerencias que nos manda la consulta
-                    $('#suggestions').fadeIn(1000).html(data);
-                    //Al hacer click en algua de las sugerencias
-                    $('.suggest-element').on('click', function(){
-                            //Obtenemos la id unica de la sugerencia pulsada
-                            var id = $(this).attr('id');
-                        
-                              var idlcliente      = $(this).attr('id').substring(7,10).match(/\d+/); 
-                            //Editamos el valor del input con data de la sugerencia pulsada
-                            $('#key').val($('#'+id).attr('data'));
-                            //Hacemos desaparecer el resto de sugerencias
-                            $('#suggestions').fadeOut(1000);
-                            alert('Has seleccionado a '+' '+$('#'+id).attr('data'));
-                            document.f1.cliente.value = idlcliente;
-                                            
-                            document.f1.clientenombre.value = $('#'+id).attr('data');
-                            return false;
-                    });
-                }
-            });
-        });
-    }); 
-
-
-    function mostrarVuelto(dato){
-      document.getElementById("tbMonto").value = 0;
-      if(dato.value == '1'){
-        document.getElementById("divMonto").style.display = "block";
-      }
-      else{
-        document.getElementById("divMonto").style.display = "none";
-      }
-    }
-
-    function vuelto() {
-      total = 0;
-      descuento = 0;
-      Billete = 0;
-     total= document.getElementById("tbTotal").value;
-     descuento = document.getElementById("descuento").value;
-     Billete = document.getElementById("tbMonto").value ;
-     alert( "Esta pagando con ¢" + Billete + " el vuelto seria de ¢" + (Billete - (total -descuento)));
-
-    }
-
-</script>        
-
-
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pagos </title>
-    <!-- Tell the browser to be responsive to screen width -->
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <!-- Bootstrap 3.3.5 -->
-    <link rel="stylesheet" href="../ventas/public/css/bootstrap.min.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="../ventas/public/css/font-awesome.css">
-   
-    <!-- Theme style -->
-    <link rel="stylesheet" href="../ventas/public/css/AdminLTE.min.css">
-    <!-- iCheck -->
-    <link rel="stylesheet" href="../ventas/public/css/blue.css">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <style type="text/css">
-      #myInput {
-        background-image: url('../ventas/css/buscador.png'); /* Add a search icon to input */
-        background-position: 10px 12px; /* Position the search icon */
-        background-repeat: no-repeat; /* Do not repeat the icon image */
-        width: 100%; /* Full-width */
-        font-size: 16px; /* Increase font-size */
-        padding: 12px 20px 12px 40px; /* Add some padding */
-        border: 1px solid #ddd; /* Add a grey border */
-        margin-bottom: 12px; /* Add some space below the input */
-      }
-
-      #myUL {
-        /* Remove default list styling */
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      #myUL li a {
-        border: 1px solid #ddd; /* Add a border to all links */
-        margin-top: -1px; /* Prevent double borders */
-        background-color: #f6f6f6; /* Grey background color */
-        padding: 12px; /* Add some padding */
-        text-decoration: none; /* Remove default text underline */
-        font-size: 18px; /* Increase the font-size */
-        color: black; /* Add a black text color */
-        display: block; /* Make it into a block element to fill the whole list */
-      }
-
-      #myUL li a:hover:not(.header) {
-        background-color: #eee; /* Add a hover effect to all links, except for headers */
-      }
-
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto de Venta Moderno</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
-  </head>
-  <body class="hold-transition login-page">
-  <?php    
-  
-  
-    if(!isset($_SESSION["carrito"])) $_SESSION["carrito"] = [];
-    $granTotal = 0;
-    $impuTotal = 0;
-  ?>
-  <div class="col-xs-12">
-    <h4>Pagos</h4>
-    <?php
-      if(isset($_GET["status"])){
-        if($_GET["status"] === "1"){
-          ?>
-            <div class="alert alert-success">
-              <strong>¡Correcto!</strong> Venta realizada correctamente
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="flex flex-col lg:flex-row h-screen">
+
+        <!-- Columna Izquierda: Resumen de la Venta -->
+        <aside class="w-full lg:w-1/3 xl:w-1/4 bg-white p-6 flex flex-col shadow-lg">
+            <h2 class="text-2xl font-bold mb-6 text-slate-700 border-b pb-4">Resumen de Venta</h2>
+            
+            <div id="cart-items" class="flex-grow overflow-y-auto custom-scrollbar pr-2">
+                <div id="empty-cart-message" class="flex flex-col items-center justify-center h-full text-slate-400">
+                    <i class="fas fa-shopping-cart fa-3x mb-4"></i>
+                    <p class="text-center">Aún no hay productos en la venta.</p>
+                </div>
             </div>
-          <?php
-        }else if($_GET["status"] === "2"){
-          ?>
-          <div class="alert alert-info">
-              <strong>Venta cancelada</strong>
+
+            <div class="mt-auto pt-6 border-t">
+                <div class="flex justify-between items-center mb-2 text-slate-600">
+                    <span>Subtotal:</span>
+                    <span id="subtotal" class="font-medium">₡ 0</span>
+                </div>
+                <div class="flex justify-between items-center mb-2 text-slate-600">
+                    <span>Descuento:</span>
+                    <span id="discount-amount" class="font-medium">₡ 0</span>
+                </div>
+                <div class="flex justify-between items-center text-xl font-bold text-slate-800 mt-4">
+                    <span>Total:</span>
+                    <span id="total">₡ 0</span>
+                </div>
+                <button id="complete-sale-btn" class="w-full bg-teal-500 text-white font-bold py-3 rounded-lg mt-6 hover:bg-teal-600 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Terminar Venta
+                </button>
             </div>
-          <?php
-        }else if($_GET["status"] === "3"){
-          ?>
-          <div class="alert alert-info">
-              <strong>Ok</strong> Producto quitado de la lista
+        </aside>
+
+        <!-- Columna Derecha: Productos y Controles -->
+        <main class="w-full lg:w-2/3 xl:w-3/4 p-6 flex flex-col">
+            <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                <h1 class="text-2xl font-bold text-teal-600 mb-4">Panel de Ventas</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Seleccionar Cliente -->
+                    <div class="relative">
+                        <label for="cliente" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Cliente</label>
+                        <i class="fas fa-user absolute left-3 top-9 text-slate-400"></i>
+                        <input type="text" id="cliente" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <!-- Seleccionar Barbero -->
+                    <div>
+                        <label for="barbero" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Barbero</label>
+                        <select id="barbero" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                            <option value="">Seleccione...</option>
+                            <?php foreach ($barberos as $barbero): ?>
+                                <option value="<?php echo htmlspecialchars($barbero['id']); ?>"><?php echo htmlspecialchars($barbero['nombre']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <!-- Descuento -->
+                    <div>
+                        <label for="descuento" class="text-xs font-semibold text-slate-500 mb-1 block">Descuento (%)</label>
+                        <input type="number" id="descuento" value="0" min="0" max="100" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <!-- Método de Pago -->
+                    <div>
+                        <label for="metodo-pago" class="text-xs font-semibold text-slate-500 mb-1 block">Método de Pago</label>
+                        <select id="metodo-pago" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                            <option value="">Seleccione...</option>
+                             <?php foreach ($metodos_pago as $metodo): ?>
+                                <option value="<?php echo htmlspecialchars($metodo['id_cat_ingresos']); ?>"><?php echo htmlspecialchars($metodo['nombre']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
             </div>
-          <?php
-        }else if($_GET["status"] === "4"){
-          ?>
-          <div class="alert alert-warning">
-              <strong>Error:</strong> El producto que buscas no existe
+
+            <!-- Búsqueda y Productos -->
+            <div class="flex-grow flex flex-col bg-white rounded-xl shadow-md p-4">
+                <div class="relative mb-4">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search-product" placeholder="Buscar producto por nombre..." class="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div id="product-list" class="flex-grow overflow-y-auto custom-scrollbar p-2 grid product-grid gap-4">
+                    <!-- Los productos se cargarán aquí -->
+                </div>
             </div>
-          <?php
-        }else if($_GET["status"] === "5"){
-          ?>
-          <div class="alert alert-danger">
-              <strong>Error: </strong>El producto está agotado
+        </main>
+    </div>
+    
+    <!-- Modal de notificación -->
+    <div id="notification-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 shadow-xl text-center">
+            <div class="text-teal-500 mb-4">
+                <i class="fas fa-check-circle fa-4x"></i>
             </div>
-          <?php
-        }else{
-          ?>
-          <div class="alert alert-danger">
-              <strong>Error:</strong> Algo salió mal mientras se realizaba la venta
-            </div>
-          <?php
-        }
-      }
-    ?>
-    <br>
-
-
-  <br>
-  <section class="content">
-          <div class="row">
-            <!-- left column -->
-            <div class="col-md-4">
-              <!-- general form elements -->
-              <div class="box box-primary">
-                <div class="box-header with-border">
-           
-                </div><!-- /.box-header -->
-                <!-- form start -->
-                 <form role="form" id="frmAcceder" name="frmAcceder">
-                  <div class="box-body">
-                    <div class="row">
-                      <div class="col-xs-12">
-                        <br><br>
-                          <table class="table table-bordered">
-                            <thead>
-                              <tr>
-                                <th>Descripción</th>
-                                <th>Precio de venta</th>
-                                <th>Cantidad</th>
-                                <th>Total</th>
-                                <th></th>
-                              </tr>
-                            </thead>
-                            <tbody>
-
-                              <?php foreach($_SESSION["carrito"] as $indice => $producto){ $granTotal += $producto->total;
-                                
-                                ?>
-
-                                <tr>
-                                  <td><?php echo $producto->nombre ?></td>
-                                  <td><?php echo $producto->precio_venta ?></td>
-                                  <td><?php echo $producto->cantidad ?></td>
-                                  <td><a class="btn btn-danger" href="../ventas/<?php  echo "quitarDelCarrito.php?indice=$indice";?>"><i class="fa fa-trash"></i></a></td>
-                                </tr>
-
-                              <?php } ?>
-
-                            </tbody>
-                          </table>
-
-                        <h3> Sin Descuento: <input type="text" id="tbTotal" value="<?php echo $granTotal; ?>" style="float:right;" >  </h3>
-                        <h3> Con Descuento: <input type="text" id="tbDesc" value="0" style="float:right;" >  </h3>
-
-
-                      </div>
-                    </div> 
-                  </div><!-- /.box-body -->
-
-                  <div class="box-footer">
-                      <a type="button" href="../layout/<?php  echo "inicio.php";?>" class="btn btn-danger">Regresar</a>
-                  </div>
-
-                </form>
-              </div><!-- /.box -->
-
-              
-
-              
-
-              
-            </div><!--/.col (left) -->
-            <!-- right column -->
-            <div class="col-md-8">
-              <!-- Horizontal Form -->
-              <div class="box box-info">
-                <div class="box-header with-border">
-                  <h3 class="box-title">POS</h3>
-                </div><!-- /.box-header -->
-                <!-- form start -->
-                
-                  <div class="box-body">
-                  <div class="box">
-                
-                <div class="box-body no-padding">
-        <div class="row">
-        <div id="content" class="col-lg-12">
-<form class="form-inline" method="post" action="#">
-
-</form>
-<div id="suggestions"></div>
+            <h3 class="text-2xl font-bold mb-2">¡Éxito!</h3>
+            <p class="text-slate-600">La venta se ha completado correctamente.</p>
+            <button id="close-modal-btn" class="mt-6 bg-teal-500 text-white px-6 py-2 rounded-lg hover:bg-teal-600 transition-colors">Cerrar</button>
         </div>
     </div>
-   <br>   <br> 
 
-   
-  <form  class="form-inline" name="f1" action="../ventas/terminarVenta.php" method="POST">
-      <input name="total" type="hidden" value="<?php echo $granTotal;?>">
-
-      <input name="id_sesion" type="hidden" value="<?php echo $id_sesion;?>">
-      <input name="tipo_venta" type="hidden" value="Contado">
-      <div>
-          
-          <div class="input-group input-group-sm" style='margin:5px;'>
-            <h3>Seleccione Cliente</h3>
-            <div class="input-group input-group-sm">
-                <input class="search_query form-control" autocomplete="off" type="text" name="key" id="key" placeholder="Buscar..." required>
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-info btn-flat"><i class="fa fa-search"></i></button>
-                    <a class="btn btn-success" href="../cliente/usuario_agregar.php"><i class="fa fa-plus"></i></a>
-                </span>
-              </div>
-          </div>
-
-
-      
-      
-        
-        <div class="input-group input-group-sm" style='margin:5px;'>
-          <h3>Seleccione Barbero</h3>
-          <div class="input-group input-group-sm">
-            <select class="form-control select2" style="width: 200px;"  id="tbBarbero" name="tbBarbero" required>
-              <option value="">Seleccione:</option>
-              <?php          
-                $query = $base_de_datos->query("SELECT * FROM usuario where tipo in('empleado','administrador')");
-                while ($valores = $query->fetch(PDO::FETCH_ASSOC)) {
-                  echo '<option value='.$valores['id'].'>'.$valores['nombre'].'</option>';
-                }
-              ?>
-            </select>
-          </div>
-        </div>
-
-        <div class="input-group input-group-sm" style='margin:5px;'>
-            <h3>Descuento</h3>
-            <div class="input-group input-group-sm">
-                <input class="search_query form-control" autocomplete="off" type="text" onchange="restar(this.value)" name="descuento" id="descuento" value="0"  required>
-              </div>
-          </div>
-
-
-          <div class="input-group input-group-sm" style='margin:5px;'>
-            <h3>Metodo de Pago</h3>
-            <div class="input-group input-group-sm">
-              <select class="form-control select2" style="width: 200px;"  id="tbMetodo" name="tbMetodo" onchange="mostrarVuelto(this)" required>
-                <option value="">Seleccione:</option>
-                <?php          
-                  $query = $base_de_datos->query("SELECT * FROM categoria_ingresos");
-                  while ($valores = $query->fetch(PDO::FETCH_ASSOC)) {
-                    echo '<option value='.$valores['id_cat_ingresos'].'>'.$valores['nombre'].'</option>';
-                  }
-                ?>
-              </select>
-            </div>
-          </div>
-       
-          <div class="input-group input-group-sm" id="divMonto" style='margin:5px;display: none;'>
-            <h3>Monto con que Paga</h3>
-            <div class="input-group input-group-sm">
-                <input class="search_query form-control" autocomplete="off" type="text" name="tbMonto" id="tbMonto" placeholder="Monto con que paga">
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-info btn-flat" onclick="vuelto()"><i class="fa fa-calculator"></i></button>
-                </span>
-              </div>
-          </div>
-
-
-      </div> 
-      <br>
-      <br>
-
-     <input name="cliente" id="cliente" type="hidden"  required>
-     
-     <br>
-     <button type="submit" class="btn btn-success">Terminar venta</button>
-  </form>
-
-
-
-
-
-
-<?php
-
-  # code...
-
-?>
-
-
-                  <div class="row">
-                        
-
-                   <div class="box-body">
-                
-         
-
- 
-                        
-<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Buscar producto..">
-
-<ul id="myUL">
-    <?php
-
-                    $query = $base_de_datos->query("select * from producto where stock > 0 and estado in('a','d')");
-                    $i=1;
-                    while($row = $query->fetch(PDO::FETCH_ASSOC)){
-                    $id_pro=$row['id_pro'];
-                
-                         $stock=$row['stock'];
-                 
-    ?>
-                
-    <div class="col-lg-4 col-xs-6">
-        <!-- small box -->
-                               
-        <div class="small-box bg-white">
-            <div class="inneri">
-                <li><a href="#updateordinance<?php echo $row['id_pro'];?>"  data-target="#updateordinance<?php echo $row['id_pro'];?>" data-toggle="modal" style="color:black;"  style="height:25%; width:75%; font-size: 12px " role="button">
-                    <div style="height: 50px;margin: 0px;padding: 0px;">
-                        <p>
-                            <b>
-                                <?php echo strtoupper($row['nombre_pro']);?>
-                            </b>
-                        <p>
-                    </div>
-                    <h3 style="color: red;">
-                        <?php echo $simbolo_moneda.' '.number_format($row['precio_venta']);?>
-                    </h3>
-                    <IMG src="../producto/subir_producto/<?php  echo $row['imagen'];?>" height="100px"></a></li>
-                           
-                <!--</tr> -->
-                <div id="updateordinance<?php echo $row['id_pro'];?>" class="modal fade in" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
-                    <div class="modal-dialog">
-                        <div class="modal-content" style="height:auto">
-                            
-                            <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                     <span aria-hidden="true"></span></button>
-                                 </div>
-                                 
-                            <div class="modal-body">
-                                <form class="form-horizontal" method="post" action="../ventas/agregarAlCarrito.php" >
-                    
-                                    <div class="row">
-                                        <div class="col-md-3 btn-print">
-                                            <div class="form-group">
-                                                 
-                                                 
-                                            </div><!-- /.form group -->
-                                        </div>
-                                        <div class="col-md-7 btn-print">
-                                            <div class="form-group">
-                                                <input type="hidden" class="form-control" id="id_producto" name="id_producto" value="<?php echo isset($row['id_pro']) ? $row['id_pro'] : '';?>" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1 btn-print">
-                                                
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-3 btn-print">
-                                            <div class="form-group">
-                                                     
-                                                 
-                                            </div><!-- /.form group -->
-                                        </div>
-                                        <div class="col-md-7 btn-print">
-                                            <div class="form-group">
-                                                <label style="color: black;" >Cantidad</label>
-                                                <input  class="form-control" name="cantidad" type="number"  min="0" max="<?php echo $row['stock']; ?>" id="cantidad" placeholder="cantidad" style="width: 100%;" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off" required>
-                                            </div>
-                                                        
-                                        </div>
-                                        <div class="col-md-1 btn-print">
-                                                
-                                        </div>
-                                    </div>
-                                
-                                    <div class="row">
-                                        <div class="col-md-3 btn-print">
-                                            <div class="form-group">
-                                      
-                                                 
-                                            </div><!-- /.form group -->
-                                        </div>
-                                        <div class="col-md-7 btn-print">
-                                            <div class="form-group">
-                                                <button type="submit" class="btn btn-primary">AGREGAR</button>
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">CERRAR</button>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1 btn-print">
-                                                
-                                        </div>
-                                    </div>
-                                    
-                                </form>    
-                            </div>
-                     
-            
-                        
-                        </div>
-                
-                        
-                        </div><!--end of modal-dialog-->
-                 
-                    </div>              
-                                          
-                </div>
-                <div class="icon" style="margin-top:10px">
-                                   
-                </div>
-                                   
-            </div>
-        </div><!-- ./col -->
-                
-                 <?php
-                }
-                 ?>
-</ul>
-
-          
-      
-
-
-
-
-
-
-      
-
-
-
-
-
-
-
-
-
-
-
-
-             
-
-                  
-                          </div>
-                        
-                   
-                        </div>
-                      </div><!-- ./col -->
-
-
-
-
-
-
-
-
-       
-
-                   
-
-                                        <?php
-                      
-                     
-                      ?>
-
-   
-
-
-          
-
-
-
-
-
-
-
-
-                  </div><!--row-->
-
-                  <?php
-
- ?>
-                </div><!-- /.box-body -->
-              </div><!-- /.box -->
-
-                  
-              </div><!-- /.box -->
-              <!-- general form elements disabled -->
-                          </div><!--/.col (right) -->
-          </div>   <!-- /.row -->
-        </section><!-- /.content -->
-      </div><!-- /.content-wrapper -->
 <script>
-function myFunction() {
-  // Declare variables
-  var input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById('myInput');
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("myUL");
-  li = ul.getElementsByTagName('li');
+document.addEventListener('DOMContentLoaded', () => {
 
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    txtValue = a.textContent || a.innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
-    } else {
-      li[i].style.display = "none";
-    }
-  }
-}
+    const products = <?php echo json_encode($productos); ?>.map(p => ({
+        id: parseInt(p.id_pro),
+        name: p.nombre_pro,
+        price: parseFloat(p.precio_venta),
+        stock: parseInt(p.stock),
+        img: `../producto/subir_producto/${p.imagen}` // Assuming image path
+    }));
 
+    let cart = [];
 
+    const productListContainer = document.getElementById('product-list');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const emptyCartMessage = document.getElementById('empty-cart-message');
+    const subtotalEl = document.getElementById('subtotal');
+    const discountAmountEl = document.getElementById('discount-amount');
+    const totalEl = document.getElementById('total');
+    const searchInput = document.getElementById('search-product');
+    const discountInput = document.getElementById('descuento');
+    const completeSaleBtn = document.getElementById('complete-sale-btn');
+    const notificationModal = document.getElementById('notification-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
 
-/* Sumar dos números. */
-function sumar (valor) {
- var impuTotal  = '<?php echo $impuTotal; ?>';
-          var granTotal  = '<?php echo $granTotal; ?>';
-        //  $granTotal=$granTotal*$porcentaje_impuesto/100+$granTotal;
-    var total = 0;  
-    valor = parseInt(valor); // Convertir el valor a un entero (número).
-  
-    total = document.getElementById('spTotal').innerHTML;
-    //descuento = document.getElementById('descuento').innerHTML;
-    // Aquí valido si hay un valor previo, si no hay datos, le pongo un cero "0".
-    total = (total == null || total == undefined || total == "") ? 0 : total;
-  
-    /* Esta es la suma. */
-    total = ( (valor) -(granTotal)-impuTotal);
+    const formatCurrency = (number) => {
+        return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(number);
+    };
 
-    // Colocar el resultado de la suma en el control "span".
-    document.getElementById('spTotal').innerHTML = total  ;
+    const renderProducts = (productsToRender) => {
+        productListContainer.innerHTML = '';
+        if (productsToRender.length === 0) {
+            productListContainer.innerHTML = `<p class="text-slate-500 col-span-full text-center">No se encontraron productos.</p>`;
+            return;
+        }
+        productsToRender.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.className = 'bg-slate-50 p-3 rounded-lg text-center cursor-pointer hover:shadow-md hover:bg-teal-50 transition-all duration-200 flex flex-col';
+            productCard.innerHTML = `
+                <img src="${product.img}" alt="${product.name}" class="w-full h-28 object-cover rounded-md mb-3 mx-auto" onerror="this.src='https://placehold.co/150x150/e2e8f0/334155?text=No+Img'">
+                <p class="font-semibold text-sm flex-grow">${product.name}</p>
+                <p class="font-bold text-teal-600 mt-2">${formatCurrency(product.price)}</p>
+            `;
+            productCard.addEventListener('click', () => addProductToCart(product.id));
+            productListContainer.appendChild(productCard);
+        });
+    };
+
+    const addProductToCart = (productId) => {
+        const product = products.find(p => p.id === productId);
+        const existingProduct = cart.find(item => item.productId === productId);
+
+        if (existingProduct) {
+            if (existingProduct.quantity < product.stock) {
+                 existingProduct.quantity++;
+            } else {
+                alert('No hay más stock disponible para este producto.');
+            }
+        } else {
+            if (product.stock > 0) {
+                cart.push({ productId: product.id, name: product.name, price: product.price, quantity: 1 });
+            } else {
+                 alert('Este producto está agotado.');
+            }
+        }
+        renderCart();
+        updateTotals();
+    };
+
+    const renderCart = () => {
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '';
+            emptyCartMessage.classList.remove('hidden');
+            return;
+        }
+        
+        emptyCartMessage.classList.add('hidden');
+        cartItemsContainer.innerHTML = '';
+
+        cart.forEach(item => {
+            const cartItemEl = document.createElement('div');
+            cartItemEl.className = 'flex items-center justify-between mb-4';
+            cartItemEl.innerHTML = `
+                <div>
+                    <p class="font-semibold">${item.name}</p>
+                    <p class="text-sm text-slate-500">${formatCurrency(item.price)}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="quantity-change text-slate-500 hover:text-red-500" data-id="${item.productId}" data-change="-1"><i class="fas fa-minus-circle"></i></button>
+                    <span class="font-bold w-5 text-center">${item.quantity}</span>
+                    <button class="quantity-change text-slate-500 hover:text-green-500" data-id="${item.productId}" data-change="1"><i class="fas fa-plus-circle"></i></button>
+                </div>
+            `;
+            cartItemsContainer.appendChild(cartItemEl);
+        });
+    };
     
-}
+    const updateTotals = () => {
+        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const discountPercentage = parseFloat(discountInput.value) || 0;
+        const discount = subtotal * (discountPercentage / 100);
+        const total = subtotal - discount;
 
-function restar(Valor){
-  total = document.getElementById('tbTotal').value;
-  document.getElementById('tbDesc').value = total - Valor;
-}
+        subtotalEl.textContent = formatCurrency(subtotal);
+        discountAmountEl.textContent = formatCurrency(discount);
+        totalEl.textContent = formatCurrency(total);
+        
+        completeSaleBtn.disabled = cart.length === 0;
+    };
+    
+    const changeQuantity = (productId, change) => {
+        const productInCart = cart.find(item => item.productId === productId);
+        if (productInCart) {
+            const product = products.find(p => p.id === productId);
+            const newQuantity = productInCart.quantity + change;
 
+            if (change > 0 && newQuantity > product.stock) {
+                 alert('No hay más stock disponible para este producto.');
+                 return;
+            }
+
+            productInCart.quantity = newQuantity;
+
+            if (productInCart.quantity <= 0) {
+                cart = cart.filter(item => item.productId !== productId);
+            }
+        }
+        renderCart();
+        updateTotals();
+    };
+
+    const filterProducts = () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filtered = products.filter(product => product.name.toLowerCase().includes(searchTerm));
+        renderProducts(filtered);
+    };
+
+    const resetSale = () => {
+        cart = [];
+        discountInput.value = 0;
+        document.getElementById('cliente').value = '';
+        document.getElementById('barbero').value = '';
+        document.getElementById('metodo-pago').value = '';
+        renderCart();
+        updateTotals();
+    };
+
+    searchInput.addEventListener('input', filterProducts);
+    discountInput.addEventListener('input', updateTotals);
+
+    cartItemsContainer.addEventListener('click', (e) => {
+        const button = e.target.closest('.quantity-change');
+        if (button) {
+            const productId = parseInt(button.dataset.id);
+            const change = parseInt(button.dataset.change);
+            changeQuantity(productId, change);
+        }
+    });
+
+    completeSaleBtn.addEventListener('click', () => {
+        if(cart.length === 0) return;
+
+        const saleData = {
+            cart: cart,
+            total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+            descuento: parseFloat(discountInput.value) || 0,
+            id_cliente: document.getElementById('cliente').value, // Needs a proper customer selection implementation
+            id_empleado: document.getElementById('barbero').value,
+            id_metodo_pago: document.getElementById('metodo-pago').value,
+        };
+
+        // Simple validation
+        if (!saleData.id_empleado || !saleData.id_metodo_pago) {
+            alert('Por favor, seleccione un barbero y un método de pago.');
+            return;
+        }
+
+        // AJAX call to a new PHP script to process the sale
+        fetch('procesar_venta_moderna.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(saleData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                notificationModal.classList.remove('hidden');
+            } else {
+                alert('Error al procesar la venta: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error de conexión al procesar la venta.');
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        notificationModal.classList.add('hidden');
+        resetSale();
+    });
+
+    renderProducts(products);
+    updateTotals();
+});
 </script>
-    <!-- jQuery 2.1.4 -->
-    <script src="../ventas/public/js/jquery.min.js"></script>
-    <!-- Bootstrap 3.3.5 -->
-    <script src="../ventas/public/js/bootstrap.min.js"></script>
-    <!-- iCheck -->
-    <script src="../ventas/public/js/icheck.min.js"></script>
-    
 
-  </body>
+</body>
 </html>
-<?php
-
-
-  
-?> -->
