@@ -29,36 +29,15 @@
             <div class="box-body">
                 <div class="row">
                     <?php
-                    $caja_cont = 0;
-                    $acumulado = 0;
-                    $id_sucursal = $_SESSION['barberia'] ?? null;
+                    // Las variables de la caja ($caja_cont, $monto_apertura, $ventas_efectivo, etc.) 
+                    // ya se calculan en top_nav.php, por lo que no es necesario volver a consultarlas aquí.
+                    $acumulado = $ventas_efectivo; // Para el botón de 'Ventas en Efectivo'
 
-                    if (!$id_sucursal) {
-                        header('Location:../../index.php');
-                        exit();
-                    }
-
-                    $caja_query = mysqli_query($con, "SELECT
-                        z.id_caja, z.estado, IFNULL(z.Todo, 0) AS monto, z.fecha_apertura, z.fecha_cierre, z.Monto_Apertura,
-                        IFNULL(z.Contado, 0) AS Monto_Efectivo, IFNULL(z.noContado, 0) AS Monto_NoContado, z.Id_Sucursal,
-                        IFNULL(z.noContado, 0) AS noContado, IFNULL(z.gastos, 0) AS gastos
-                        FROM (
-                            SELECT *,
-                                (SELECT IFNULL(SUM(monto_pagado), 0) FROM pedidos WHERE CAST(fecha AS DATE) >= CAST(c.fecha_apertura AS DATE) AND Id_Sucursal = $id_sucursal) AS Todo,
-                                (SELECT IFNULL(SUM(monto_pagado), 0) FROM pedidos WHERE id_cat_ingresos = 1 AND CAST(fecha AS DATE) >= CAST(c.fecha_apertura AS DATE) AND Id_Sucursal = $id_sucursal) AS Contado,
-                                (SELECT IFNULL(SUM(monto_pagado), 0) FROM pedidos WHERE id_cat_ingresos <> 1 AND CAST(fecha AS DATE) >= CAST(c.fecha_apertura AS DATE) AND Id_Sucursal = $id_sucursal) AS noContado,
-                                (SELECT IFNULL(SUM(cantidad), 0) FROM gastos WHERE CAST(fecha AS DATE) >= CAST(c.fecha_apertura AS DATE) AND Id_Sucursal = $id_sucursal) AS gastos
-                            FROM caja AS c
-                            WHERE c.estado = 'abierto' AND Id_Sucursal = $id_sucursal
-                        ) AS z;") or die(mysqli_error($con));
-
-                    if ($row_caja = mysqli_fetch_array($caja_query)) {
-                        $caja_cont = 1;
-                        $MontoTotal = $row_caja['monto'];
-                        $NoContado = $row_caja['noContado'];
-                        $Gastos = $row_caja['gastos'];
-                        $acumulado = $MontoTotal - ($NoContado + $Gastos);
-                    }
+                    // Calculamos los gastos para el modal de cierre
+                    $gastos_query = mysqli_query($con, "SELECT IFNULL(SUM(cantidad), 0) AS gastos FROM gastos g JOIN caja c ON CAST(g.fecha AS DATE) >= CAST(c.fecha_apertura AS DATE) WHERE c.estado = 'abierto' AND c.Id_Sucursal = $id_sucursal");
+                    $gastos_row = mysqli_fetch_array($gastos_query);
+                    $gastos_del_dia = $gastos_row['gastos'];
+                    $monto_final_caja = $monto_apertura + $ventas_efectivo - $gastos_del_dia;
 
                     if ($caja_cont == 0) {
                     ?>
@@ -70,7 +49,7 @@
                         <div class="row">
                             <div class="col-md-4 col-lg-12 hide-section">
                                 <a class="btn btn-danger btn-print" disabled="true" style="height:25%; width:50%; font-size: 25px" role="button">
-                                    MONTO - APERT= <label style='color:black; font-size: 25px'><?php echo "$simbolo_moneda $acumulado $moneda"; ?></label>
+                                    Ventas en Efectivo= <label style='color:black; font-size: 25px'><?php echo "$simbolo_moneda $ventas_efectivo $moneda"; ?></label>
                                 </a>
                             </div>
                         </div>
@@ -91,7 +70,7 @@
                             <div class="modal-body">
                                 <div class="form-group">
                                     <label for="monto">Monto Final en Caja</label>
-                                    <input type="text" class="form-control" id="monto" name="monto" value="<?php echo $acumulado; ?>" readonly>
+                                    <input type="text" class="form-control" id="monto" name="monto" value="<?php echo $monto_final_caja; ?>" readonly>
                                     <p class="help-block">Este es el monto calculado. ¿Desea continuar con el cierre?</p>
                                 </div>
                             </div>
@@ -146,13 +125,22 @@
                     <tbody>
                         <?php
                         // --- CORRECCIÓN AQUÍ ---
-                        $query = mysqli_query($con, "SELECT id_caja, estado, monto, fecha_apertura, fecha_cierre, Monto_Apertura, IFNULL(z.Contado,0) as Monto_Efectivo, IFNULL(z.noContado,0) as Monto_NoContado, Id_Sucursal
-                            FROM (
-                                SELECT *,
-                                (SELECT sum(monto_pagado) FROM pedidos WHERE id_cat_ingresos = 1 AND CAST(fecha as DATE) = CAST(c.fecha_apertura as DATE) AND Id_Sucursal = $id_sucursal) as Contado,
-                                (SELECT sum(monto_pagado) FROM pedidos WHERE id_cat_ingresos <> 1 AND CAST(fecha as DATE) = CAST(c.fecha_apertura as DATE) AND Id_Sucursal = $id_sucursal) as noContado
-                                FROM caja c WHERE Id_Sucursal = $id_sucursal ORDER BY id_caja DESC LIMIT 10
-                            ) as z ORDER BY id_caja DESC;") or die(mysqli_error($con));
+                        $query = mysqli_query($con, "
+                            SELECT 
+                                id_caja, 
+                                estado, 
+                                monto, 
+                                fecha_apertura, 
+                                fecha_cierre, 
+                                Monto_Apertura, 
+                                Monto_Efectivo, 
+                                Monto_NoContado, 
+                                Id_Sucursal
+                            FROM caja
+                            WHERE Id_Sucursal = $id_sucursal 
+                            ORDER BY id_caja DESC 
+                            LIMIT 10
+                        ") or die(mysqli_error($con));
                         while ($row = mysqli_fetch_array($query)) {
                         ?>
                             <tr>

@@ -22,21 +22,24 @@ $acumulado=0;
     $row_empresa=mysqli_fetch_array($query_empresa);
     $simbolo_moneda = $row_empresa['simbolo_moneda'];
 
-    $caja_query=mysqli_query($con,"SELECT
-    c.*,
-    IFNULL(
-        (SELECT IFNULL(SUM(monto_pagado), 0) as todo FROM pedidos WHERE CAST(fecha as DATE) >= CAST(c.fecha_apertura as DATE) and id_cat_ingresos = 1) + c.Monto_Apertura,
-        0
-    ) as Efetivo
-FROM
-    caja c
-WHERE
-    estado = 'abierto'
-    AND Id_Sucursal = $id_sucursal;")or die(mysqli_error());
-    $i=0;
-    while($row_caja=mysqli_fetch_array($caja_query)){
-      $caja_cont++;
-      $acumulado=$row_caja['Efetivo'];
+    $caja_query=mysqli_query($con,"SELECT 
+        c.Monto_Apertura,
+        (SELECT IFNULL(SUM(monto_pagado), 0) FROM pedidos WHERE id_cat_ingresos = 1 AND CAST(fecha AS DATE) >= CAST(c.fecha_apertura AS DATE) AND Id_Sucursal = c.Id_Sucursal) AS Ventas_Efectivo,
+        (SELECT IFNULL(SUM(monto_pagado), 0) FROM pedidos WHERE id_cat_ingresos <> 1 AND CAST(fecha AS DATE) >= CAST(c.fecha_apertura AS DATE) AND Id_Sucursal = c.Id_Sucursal) AS Ventas_Otros_Metodos
+    FROM caja AS c
+    WHERE c.estado = 'abierto' AND c.Id_Sucursal = $id_sucursal")or die(mysqli_error());
+
+    $monto_apertura = 0;
+    $ventas_efectivo = 0;
+    $ventas_otros_metodos = 0;
+    $total_caja = 0;
+
+    if($row_caja=mysqli_fetch_array($caja_query)){
+      $caja_cont=1;
+      $monto_apertura = $row_caja['Monto_Apertura'];
+      $ventas_efectivo = $row_caja['Ventas_Efectivo'];
+      $ventas_otros_metodos = $row_caja['Ventas_Otros_Metodos'];
+      $total_caja = $monto_apertura + $ventas_efectivo + $ventas_otros_metodos;
     }
 if ($caja_cont==0) {
 
@@ -76,29 +79,20 @@ if ($caja_cont==0) {
                       ?>
          <li class="">
                   <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    <img src="../layout/images/caja.png" alt="">CAJA<?php echo "<h2>$simbolo_moneda $acumulado</h2>"; ?>
+                    <img src="../layout/images/caja.png" alt="">CAJA<?php echo "<h2>$simbolo_moneda $total_caja</h2>"; ?>
 
                     <span class=" fa fa-angle-down"></span>
                   </a>
                   <ul class="dropdown-menu dropdown-usermenu pull-right">
-                          <?php
-                          if ($caja_cont==0) {
-
-
-                          ?>
-                           <li><a href="caja.php"><i class="fa fa-money"></i> Abrir  caja</a></li>
-                                   <?php                   
-}
-           if ($caja_cont>0) {
-
-
-                          ?>   
-
-                    <li><a href="caja_close.php"><i class="fa fa-money"></i> Cerrar caja</a></li>
-
-                         <?php 
-                         }
-                             ?>  
+                      <li><a>Apertura: <?php echo "$simbolo_moneda $monto_apertura"; ?></a></li>
+                      <li><a>Efectivo: <?php echo "$simbolo_moneda $ventas_efectivo"; ?></a></li>
+                      <li><a>Otros Métodos: <?php echo "$simbolo_moneda $ventas_otros_metodos"; ?></a></li>
+                      <li class="divider"></li>
+                      <?php if ($caja_cont == 0): ?>
+                          <li><a href="caja.php"><i class="fa fa-money"></i> Abrir caja</a></li>
+                      <?php else: ?>
+                          <li><a href="caja_close.php"><i class="fa fa-money"></i> Cerrar caja</a></li>
+                      <?php endif; ?>
                   </ul>
                 </li>  
 
