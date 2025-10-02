@@ -45,7 +45,7 @@ try {
     }
 
     // 3. Actualizar montos de caja
-    $sentencia_caja = $base_de_datos->prepare("CALL ActualizarMontosCaja(?, ?);");
+    $sentencia_caja = $base_de_datos->prepare("CALL u876327316_peluqueria.ActualizarMontosCaja(?, ?);");
     $sentencia_caja->execute([$total_venta, $id_sucursal]);
 
     $base_de_datos->commit();
@@ -56,5 +56,4 @@ try {
     $base_de_datos->rollBack();
     echo json_encode(['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()]);
 }
-
 ?>

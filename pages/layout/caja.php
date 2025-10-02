@@ -1,4 +1,3 @@
-
 <?php include '../layout/header.php';
 
 //$branch_id = $_GET['id'];
@@ -61,10 +60,6 @@ ul {
 
 
 
-
-
-
-
                 <div class="box-header with-border">
                   <h3 class="box-title"></h3>
                 </div><!-- /.box-header -->
@@ -81,7 +76,7 @@ $caja_cont=0;
 $acumulado=0;
 
 $id_sucursal;
-	 session_start();
+
 	 if (!isset($_SESSION['barberia'])) {
 		header('Location:../../index.php');
 	 }
@@ -244,9 +239,6 @@ if ($caja_cont>0) {
 
 
 
-
-
-
 <div class="modal fade" id="miModalcaja" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -384,94 +376,4 @@ function Buscar() {
             for (var i = 1; i < tabla.rows.length; i++) {
                 cellsOfRow = tabla.rows[i].getElementsByTagName('td');
                 found = false;
-                for (var j = 0; j < cellsOfRow.length && !found; j++) { compareWith = cellsOfRow[j].innerHTML.toLowerCase(); if (busqueda.length == 0 || (compareWith.indexOf(busqueda) > -1))
-                    {
-                        found = true;
-                    }
-                }
-                if(found)
-                {
-                    tabla.rows[i].style.display = '';
-                } else {
-                    tabla.rows[i].style.display = 'none';
-                }
-            }
-        }
-// ]]></script>
-                </div><!-- /.box-body -->       
-
-
-
-      
-
-
-
-
-
-                  </div><!--row-->
-                  
-      
-  
-   
-            </div><!-- /.col (right) -->
-                </div><!-- /.box-body -->
-
-            </div><!-- /.col -->
-
-
-          </div><!-- /.row -->
-
-
-
-
-                </div><!-- /.box-body -->
-
-            </div>
-        </div>
-      </div>
-        </div>
-        <!-- /page content -->
-
-        <!-- footer content -->
-    <footer>
-          <div class="pull-right">
-          </div>
-          <div class="clearfix"></div>
-        </footer>
-        <!-- /footer content -->
-      </div>
-    </div>
-
-  <?php include '../layout/datatable_script.php';?>
-
-
-
-        <script>
-        $(document).ready( function() {
-                $('#example2').dataTable( {
-                 "language": {
-                   "paginate": {
-                      "previous": "anterior",
-                      "next": "posterior"
-                    },
-                    "search": "Buscar:",
-
-
-                  },
-
-                  "info": false,
-                  "lengthChange": false,
-                  "searching": false,
-
-
-  "searching": true,
-                }
-
-              );
-              } );
-    </script>
-
-
-    <!-- /gauge.js -->
-  </body>
-</html>
+                for (var j = 0; j < cellsOfRow.length && !found; j++) { compareWith = cellsOfRow[j].innerHTML.toLowerCase(); if (busqueda.length == 0 || (compareWith.indexOf(bus

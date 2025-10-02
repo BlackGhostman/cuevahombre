@@ -5,8 +5,8 @@ endif;
 $num_pedido=$_GET['num_pedido'];
 ?>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "[http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd](http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd)">
+<html xmlns="[http://www.w3.org/1999/xhtml](http://www.w3.org/1999/xhtml)">
 
 <head><meta http-equiv="Content-Type" content="text/html; charset=gb18030">
   
@@ -59,7 +59,6 @@ tr{
     border:none; font-size: 8px;
 }
 </style>
-</style>
 </head>
 
 <body>
@@ -75,14 +74,15 @@ include('../../dist/includes/dbcon.php');
   
 
 $total_todos=0;
+$id_vendedor = '';
 
-    $query3=mysqli_query($con,"select * from usuario AS u INNER JOIN pedidos AS p
+    $query3=mysqli_query($con,"select *, u.nombre_completo as nombre_cliente, u.telefono as telefono_cliente from usuario AS u INNER JOIN pedidos AS p
       ON u.id = p.id_cliente where id_pedido='$num_pedido' ")or die(mysqli_error($con));
 
    while($row3=mysqli_fetch_array($query3)){
 
-         $nombre_cliente=$row3['nombre'].'  '.$row3['apellido'];
-     $telefono_cliente=$row3['telefono'];
+         $nombre_cliente=$row3['nombre_cliente'];
+     $telefono_cliente=$row3['telefono_cliente'];
           $fecha=$row3['fecha'];
             $id_vendedor=$row3['id_sesion'];
           
@@ -93,13 +93,12 @@ $total_todos=0;
 
    while($row2=mysqli_fetch_array($query2)){
 
-         $nombre_vendedor=$row2['nombre'].'  '.$row2['apellido'];
+         $nombre_vendedor=$row2['nombre_completo'];
      $telefono_vendedor=$row2['telefono'];
      
       }
 
        
-
 $sum=0;
 $impuesto_producto=0;
          $query11=mysqli_query($con,"select * from empresa where id_empresa='1' ")or die(mysqli_error($con));
@@ -120,7 +119,6 @@ $impuesto_producto=0;
 
 
       }
-
 
 
 
@@ -416,155 +414,4 @@ INNER JOIN detalles_pedido AS t
 
          <div class="left">
 
-            <table class="table table-bordered table-striped"  >
-                    <thead>
-                      <tr>
-  <th style="border:none;"></th>
-
-               
-                        <th style="border:none;"></th>
-                        <th style="border:none;"></th>
-                        
-                      
-                      </tr>
-                    </thead>
-                    <tbody>
-                          <tr >
-             <tr style="border:none;  ">
-             <tr style="border:none; " >
-            <td style="border:none;" > </td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" > </td>
-            <td style="border:none; " ></td>
-              <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-       
-         
-       
-            <td style="border:none;">
-
-               
-      
-              </tr>
-
-                   
-                 
-                  
-                 </tr> 
-                   </tbody>
-
-                  </table>   
-
-      
-       </div>
-
-
-          
-          <div class="right">
-
-     <div id="customer">
-    
-
-
-
-
-                            <table class="table table-bordered table-striped"  >
-                    <thead>
-                      <tr>
-
-
-                         <td ><h4>TOTAL  </h4></td>
-               <td ><h4><?php echo $sum;?>  </h4><br> </td>
-                        </th>
-                  
-                        
-                      
-                      </tr>
-                    </thead>
-                    <tbody>
-
-                 
-              
-                   </tbody>
-
-                  </table> 
-     </div>
-
-       </div>
-
-   
-   
-
-                
-<br>
-<br>
-
-<br><br><br><br><br>
-<p id="terminos"> 
-
-
-</p>
-
-                    <CENTER>
-
-            <table class="table table-bordered table-striped"  style="border:none;">
-                    <thead>
-                      <tr>
-
-
-                        <th style="border:none;"></th>
-                        <th style="border:none;"></th>
-                       
-                        
-                      
-                      </tr>
-                    </thead>
-                    <tbody>
-                          <tr >
-
-    <tr style="border:none;  width: 70px">
-          <tr style="border:none; width: 70px ">
-             <tr style="border:none;  ">
-              <td style="border:none;"></td> 
-                <td style="border:none; "></td>    
-<td style="border:none;">------------------------------------------------</td> 
-<td style="border:none;"></td> 
-<td style="border:none;"></td> 
-                    <td style="border:none;"> </td> 
-                <td style="border:none; "></td>  
-
-                <td style="border:none;">------------------------------------------------</td> 
-                    <td style="border:none;"> </td>   
-                <td style="border:none; "></td> 
-              </tr>
-                 <tr style="border:none; ">
-                      <tr style="border:none;  ">
-                            <tr style="border:none;  ">
-              <td style="border:none; width: 70px"></td> 
-                <td style="border:none; width: 70px"> </td> 
-                <td style="border:none;"> <?php echo $nombre_vendedor;?>:</td> 
-<td style="border:none;"></td> 
-<td style="border:none;"></td> 
-                    <td style="border:none;"> </td> 
-                <td style="border:none; "></td>  
-
-                <td style="border:none;">ENTREGUE CONFORME</td> 
-                    <td style="border:none;"> </td> 
-                <td style="border:none; "></td>     
-              </tr>
-       
-                  
-                 </tr> 
-                   </tbody>
-
-                  </table>
-                  </CENTER>
-
-
-       
-</body>
-
-</html>
+            <table class="table table-
