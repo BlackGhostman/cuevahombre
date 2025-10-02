@@ -22,6 +22,11 @@ $num_pedido=$_GET['num_pedido'];
     .header {
         text-align: center;
     }
+    .header img {
+        width: 60mm;
+        height: auto;
+        margin-bottom: 10px;
+    }
     .header h1 {
         font-size: 16px;
         margin-bottom: 5px;
@@ -117,6 +122,7 @@ if ($row11 = mysqli_fetch_array($query11)) {
 
 <div id="page-wrap">
     <div class="header">
+        <img src="http://cuevadehombre.barbercr.net/peluqueria_tusolutionweb/pages/img/descargar.jpg" alt="Logo de la empresa">
         <h1><?php echo $empresa; ?></h1>
         <p><?php echo $nit; ?></p>
     </div>
