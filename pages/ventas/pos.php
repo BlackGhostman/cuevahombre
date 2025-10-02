@@ -526,13 +526,16 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify(saleData),
         })
         .then(response => response.json())
-        .then(data => {
-            if(data.success) {
-                notificationModal.classList.remove('hidden');
-            } else {
-                alert('Error al procesar la venta: ' + data.message);
-            }
-        })
+.then(data => {
+    if(data.success) {
+        if (data.id_pedido) {
+            window.open(`../reportes/generar_pdf.php?num_pedido=${data.id_pedido}`, '_blank');
+        }
+        notificationModal.classList.remove('hidden');
+    } else {
+        alert('Error al procesar la venta: ' + data.message);
+    }
+})
         .catch(error => {
             console.error('Error:', error);
             alert('Ocurrió un error de conexión al procesar la venta.');

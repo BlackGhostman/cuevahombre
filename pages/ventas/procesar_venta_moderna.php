@@ -50,10 +50,9 @@ try {
 
     $base_de_datos->commit();
 
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'id_pedido' => $id_pedido]);
 
 } catch (Exception $e) {
     $base_de_datos->rollBack();
     echo json_encode(['success' => false, 'message' => 'Error en la base de datos: ' . $e->getMessage()]);
 }
-?>

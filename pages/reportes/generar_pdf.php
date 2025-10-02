@@ -4,414 +4,175 @@ header('Location:../index.php');
 endif;
 $num_pedido=$_GET['num_pedido'];
 ?>
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "[http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd](http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd)">
-<html xmlns="[http://www.w3.org/1999/xhtml](http://www.w3.org/1999/xhtml)">
-
-<head><meta http-equiv="Content-Type" content="text/html; charset=gb18030">
-  
-
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>COMPROBANTE</title>
-
-  <link rel='stylesheet' type='text/css' href='../css/style.css' />
-  <link rel='stylesheet' type='text/css' href='../css/print.css' media="print" />
-  <script type='text/javascript' src='../js/jquery-1.3.2.min.js'></script>
-  <script type='text/javascript' src='../js/example.js'></script>
-
-
-<style>
-
-.left{
-    float: left;
-
-}
-.right{
-    float: right;
-
-}
-.center{
-
-   display:inline-block
-}
-@media print {
-    .btn-print {
-      display:none !important;
-    size:30px;
+  <style>
+    body {
+        color: #000;
     }
-
-}
-hr {
-  height: 3px;
-  width: 100%;
-  background-color: black;
-}
-#abajo{
-    height: 3px;
-  width: 30%;
-  background-color: black;
-}
-tr{
-  font-family:'Helvetica','Verdana','Monaco',sans-serif;
-  border:none; font-size: 15px;
-
-}
-#terminos{
-    border:none; font-size: 8px;
-}
-</style>
+    #page-wrap {
+        width: 80mm;
+        margin: 0 auto;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 12px;
+    }
+    .header {
+        text-align: center;
+    }
+    .header h1 {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+    .info, .items, .totals {
+        margin-top: 15px;
+        border-top: 1px dashed #000;
+        padding-top: 10px;
+    }
+    .info p, .totals p {
+        margin: 0;
+    }
+    .items table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .items th, .items td {
+        padding: 5px 0;
+        text-align: left;
+    }
+    .items .qty {
+        text-align: center;
+    }
+    .items .total {
+        text-align: right;
+    }
+    .totals table {
+        width: 100%;
+    }
+    .totals td {
+        width: 50%;
+        text-align: right;
+    }
+    .totals .strong {
+        font-weight: bold;
+    }
+    .footer {
+        text-align: center;
+        margin-top: 20px;
+        border-top: 1px dashed #000;
+        padding-top: 10px;
+    }
+    .btn-print {
+        display: none;
+    }
+    @media print {
+        .btn-print {
+            display: none !important;
+        }
+        body {
+            margin: 0;
+        }
+    }
+  </style>
 </head>
+<body onload="window.print();">
 
-<body>
-
-  <?php
+<?php
 include('../../dist/includes/dbcon.php');
 
-
-
-  ?>
-
-  <?php
-  
-
-$total_todos=0;
+$nombre_cliente = 'Genérico';
+$telefono_cliente = '';
+$fecha = '';
+$nombre_vendedor = '';
+$empresa = '';
+$nit = '';
 $id_vendedor = '';
 
-    $query3=mysqli_query($con,"select *, u.nombre_completo as nombre_cliente, u.telefono as telefono_cliente from usuario AS u INNER JOIN pedidos AS p
-      ON u.id = p.id_cliente where id_pedido='$num_pedido' ")or die(mysqli_error($con));
+// Fetch order and client details
+$query3 = mysqli_query($con, "SELECT p.*, u.nombre_completo, u.telefono FROM pedidos AS p LEFT JOIN usuario AS u ON p.id_cliente = u.id WHERE p.id_pedido='$num_pedido'") or die(mysqli_error($con));
+if ($row3 = mysqli_fetch_array($query3)) {
+    $nombre_cliente = $row3['nombre_completo'] ?: 'Genérico';
+    $telefono_cliente = $row3['telefono'];
+    $fecha = date("Y-m-d", strtotime($row3['fecha']));
+    $id_vendedor = $row3['id_sesion'];
+}
 
-   while($row3=mysqli_fetch_array($query3)){
+// Fetch seller details
+if ($id_vendedor) {
+    $query2 = mysqli_query($con, "SELECT nombre_completo FROM usuario WHERE id='$id_vendedor'") or die(mysqli_error($con));
+    if ($row2 = mysqli_fetch_array($query2)) {
+        $nombre_vendedor = $row2['nombre_completo'];
+    }
+}
 
-         $nombre_cliente=$row3['nombre_cliente'];
-     $telefono_cliente=$row3['telefono_cliente'];
-          $fecha=$row3['fecha'];
-            $id_vendedor=$row3['id_sesion'];
-          
-      }
+// Fetch company details
+$query11 = mysqli_query($con, "SELECT empresa, ruc FROM empresa WHERE id_empresa='1'") or die(mysqli_error($con));
+if ($row11 = mysqli_fetch_array($query11)) {
+    $empresa = $row11['empresa'];
+    $nit = $row11['ruc'];
+}
+?>
 
-       
-    $query2=mysqli_query($con,"select * from usuario  where id='$id_vendedor' ")or die(mysqli_error($con));
+<div id="page-wrap">
+    <div class="header">
+        <h1><?php echo $empresa; ?></h1>
+        <p><?php echo $nit; ?></p>
+    </div>
 
-   while($row2=mysqli_fetch_array($query2)){
+    <div class="info">
+        <p><strong>Recibo N°:</strong> <?php echo $num_pedido; ?></p>
+        <p><strong>Fecha:</strong> <?php echo $fecha; ?></p>
+        <p><strong>Cliente:</strong> <?php echo $nombre_cliente; ?></p>
+        <?php if ($telefono_cliente): ?>
+            <p><strong>Teléfono:</strong> <?php echo $telefono_cliente; ?></p>
+        <?php endif; ?>
+        <p><strong>Atendido por:</strong> <?php echo $nombre_vendedor; ?></p>
+    </div>
 
-         $nombre_vendedor=$row2['nombre_completo'];
-     $telefono_vendedor=$row2['telefono'];
-     
-      }
+    <div class="items">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th class="qty">Cant.</th>
+                    <th class="total">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $total_final = 0;
+                $query4 = mysqli_query($con, "SELECT p.nombre_pro, t.cantidad, p.precio_venta FROM producto AS p INNER JOIN detalles_pedido AS t ON p.id_pro = t.id_producto WHERE t.id_pedido='$num_pedido'") or die(mysqli_error($con));
+                while ($row4 = mysqli_fetch_array($query4)) {
+                    $item_total = $row4['precio_venta'] * $row4['cantidad'];
+                    $total_final += $item_total;
+                ?>
+                <tr>
+                    <td><?php echo $row4['nombre_pro']; ?></td>
+                    <td class="qty"><?php echo $row4['cantidad']; ?></td>
+                    <td class="total"><?php echo number_format($item_total, 2); ?></td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
 
-       
-$sum=0;
-$impuesto_producto=0;
-         $query11=mysqli_query($con,"select * from empresa where id_empresa='1' ")or die(mysqli_error($con));
+    <div class="totals">
+        <table>
+            <tr>
+                <td class="strong">TOTAL:</td>
+                <td class="strong"><?php echo number_format($total_final, 2); ?></td>
+            </tr>
+        </table>
+    </div>
 
-   while($row11=mysqli_fetch_array($query11)){
-        $empresa=$row11['empresa'];
-        $nit=$row11['ruc'];
- $impuesto_producto=$row11['impuesto_producto'];
+    <div class="footer">
+        <p>¡Gracias por su compra!</p>
+    </div>
+</div>
 
-      } 
+<a class="btn-print" href="../layout/inicio.php">Volver a la página de inicio</a>
 
-    $query5=mysqli_query($con,"select * from detalles_pedido AS d INNER JOIN producto AS p
-      ON d.id_producto = p.id_pro where id_pedido='$num_pedido' ")or die(mysqli_error($con));
-
-   while($row5=mysqli_fetch_array($query5)){
-        $sum=$sum+$row5['precio_venta']*$row5['cantidad']+($row5['precio_venta']*$row5['cantidad'])*$impuesto_producto/100;
-        
-
-
-      }
-
-
-
-
-  ?>
-
-
-  <div id="page-wrap">
-
-    <div class="container">
-
-   <div class="right">
-
-     <div id="customer">
-
-     </div>
-
-       </div>
-
-
-
-         <div class="left">
-<table class="table table-bordered table-striped"  style="border:none;">
-        <tbody>
-          <tr style="border:none; " >
-            <td style="border:none;" > </td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" > </td>
-            <td style="border:none; " ></td>
-              <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-       
-         
-       
-            <td style="border:none;">
-                        <h3><?php echo $empresa;?></h3>
-                          <h3><?php echo $nit;?></h3>
-                       
-                          <h3>Cliente: <?php echo $nombre_cliente;?></h3>
-                          <h3>Telefono: <?php echo $telefono_cliente;?></h3>
-                 
-                      
-                          
-            </td>
-            <td style="border:none;">&nbsp;</td>
-            <td style="border:none;">&nbsp;</td>
-          </tr>
-          <tr style="border:none; ">
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"> </td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;">&nbsp;</td>
-            <td style="border:none; ">&nbsp;</td>
-          </tr>
-  
-               
-  </tbody>
-      </table>
-
-
-       </div>
-          <div class="right">
-
-     <div id="customer">
-          <table class="table table-bordered table-striped"  >
-                    <thead>
-                      <tr>
-
-
-                        <th><h3>Nun: <?php echo $num_pedido;?></h3>
-                         <h3> Fecha: <?php echo $fecha;?></h3>
-                        </th>
-                  
-                        
-                      
-                      </tr>
-                    </thead>
-                    <tbody>
-
-                 
-              
-                   </tbody>
-
-                  </table>    
-<br>
-                       <table class="table table-bordered table-striped"  >
-                    <thead>
-                      <tr>
-
-
-
-                        </th>
-                  
-                        
-                      
-                      </tr>
-                    </thead>
-                    <tbody>
-
-                 
-              
-                   </tbody>
-
-                  </table>  
-<br>
-
-
-
-
-     </div>
-
-       </div>
-       <br><br><br><br><br><br><br><br><br><br><br><br><br>    <br>
-<table class="table table-bordered table-striped"  style="border:none;">
-        <tbody>
-          <tr style="border:none; " >
-            <td style="border:none;" > </td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" > </td>
-            <td style="border:none; " ></td>
-              <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-                  <td style="border:none; " ></td>
-                    <td style="border:none; " ></td>
-                      <td style="border:none; " ></td>
-                        <td style="border:none; " ></td>
-                                      <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-                  <td style="border:none; " ></td>
-                    <td style="border:none; " ></td>
-                      <td style="border:none; " ></td>
-                        <td style="border:none; " ></td>
-                                      <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-                  <td style="border:none; " ></td>
-                    <td style="border:none; " ></td>
-                      <td style="border:none; " ></td>
-                        <td style="border:none; " ></td>
-                                      <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-                  <td style="border:none; " ></td>
-                    <td style="border:none; " ></td>
-                      <td style="border:none; " ></td>
-                        <td style="border:none; " ></td>
-      
-              <h4></h4>
-
-            </td>
-            <td style="border:none;">&nbsp;</td>
-            <td style="border:none;">&nbsp;</td>
-          </tr>
-          <tr style="border:none; ">
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;"> </td>
-            <td style="border:none;"></td>
-            <td style="border:none;"></td>
-            <td style="border:none;">&nbsp;</td>
-            <td style="border:none; ">&nbsp;</td>
-          </tr>
-  
-               
-  </tbody>
-      </table>
-
-<center>
-       <h1><?php echo $empresa;?></h1>
-</center>
-
-<table class="table table-bordered table-striped"  style="border:none;">
-        <tbody>
-          <tr style="border:none; " >
-            <td style="border:none;" > </td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" > </td>
-            <td style="border:none; " ></td>
-              <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-       
-         
-       
-            <td style="border:none;">
-                        <h5>Concepto venta y servicio </h5>
-              
-
-   <a class = "btn btn-success btn-print" href = "" onclick = "window.print()"><i class ="glyphicon glyphicon-print"></i> Impresión</a>
-                  <a class = "btn btn-primary btn-print" href = "../layout/inicio.php"><i class ="glyphicon glyphicon-arrow-left"></i>Volver a la página de inicio</a>
- 
-            </td>
-            <td style="border:none;">&nbsp;</td>
-            <td style="border:none;">&nbsp;</td>
-          </tr>
-
-  
-               
-  </tbody>
-      </table>
-
-
-
-                 
-                  
-
-
-<br>
-
-                  
-
-             <table class="table table-bordered table-striped"  >
-                    <thead>
-                      <tr>
-
-            <td style="border:none;" > </td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" > </td>
-            <td style="border:none; " ></td>
-              <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-       
-         
-       
-            <td style="border:none;">
-                        <th style="border:none;">nombre producto</th>
-                        <th style="border:none;">cantidad</th>
-                       <th style="border:none;">precio venta</th>
-                         <th style="border:none;">Sub Total</th>
-                           <th style="border:none;">Impuesto</th>
-                               <th style="border:none;">Sub Total con impuestos</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <?php
-
-                      $total=0;
-                                     $query4=mysqli_query($con,"select * from producto AS p
-INNER JOIN detalles_pedido AS t
-    ON p.id_pro = t.id_producto  where id_pedido='$num_pedido'")or die(mysqli_error($con));
-                    while ($row4=mysqli_fetch_array($query4)){
-                     $total= $row4['precio_venta']*$row4['cantidad'];
-
-                      ?>
-                      <tr style="border:none;  ">
-                                    <td style="border:none;" > </td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" ></td>
-            <td style="border:none;" > </td>
-            <td style="border:none; " ></td>
-              <td style="border:none; " ></td>
-                <td style="border:none; " ></td>
-       
-         
-       
-            <td style="border:none;">
-              <td style="width: 300px;"><?php echo $row4['nombre_pro'];?></td> 
-                <td style="width: 300px;"><?php echo $row4['cantidad'];?></td> 
-                <td style="width: 300px;"><?php echo $row4['precio_venta'];?></td>   
-                          <td><?php echo number_format($row4['precio_venta']*$row4['cantidad'],2);?></td>  
-                 <td><?php echo number_format(($row4['precio_venta']*$row4['cantidad'])*$impuesto_producto/100,2);?></td>  
-                  <td><?php echo number_format($row4['precio_venta']*$row4['cantidad']+($row4['precio_venta']*$row4['cantidad'])*$impuesto_producto/100,2);?></td>
-              </tr>
-         <?php
-            }
-              ?>
-                 
-              
-                   </tbody>
-
-                  </table>    
-
-
-
-         <div class="left">
-
-            <table class="table table-
+</body>
+</html>
