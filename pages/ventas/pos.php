@@ -20,6 +20,10 @@ $barberos = $query_barberos->fetchAll(PDO::FETCH_ASSOC);
 $query_metodos_pago = $base_de_datos->query("SELECT id_cat_ingresos, nombre FROM categoria_ingresos");
 $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
 
+// Fetch generic client
+$query_cliente_generico = $base_de_datos->query("SELECT id, nombre_completo AS nombre FROM usuario WHERE id = 22");
+$cliente_generico = $query_cliente_generico->fetch(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -102,7 +106,7 @@ $metodos_pago = $query_metodos_pago->fetchAll(PDO::FETCH_ASSOC);
                         <div class="relative">
                             <label for="cliente" class="text-xs font-semibold text-slate-500 mb-1 block">Seleccione Cliente</label>
                             <i class="fas fa-user absolute left-3 top-9 text-slate-400"></i>
-                            <input type="text" id="cliente" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" readonly>
+                            <input type="text" id="cliente" placeholder="Buscar..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" value="<?php echo htmlspecialchars($cliente_generico['nombre'] ?? 'GENERICO'); ?>" readonly>
                         </div>
                         <!-- Seleccionar Barbero -->
                         <div>
@@ -226,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeClienteModalBtn = document.getElementById('close-cliente-modal-btn');
     const clienteModalSearchInput = document.getElementById('cliente-modal-search');
     const clienteModalResults = document.getElementById('cliente-modal-results');
-    let selectedClientId = null;
+    let selectedClientId = <?php echo $cliente_generico['id'] ?? 22; ?>;
 
     const clienteCreateModal = document.getElementById('cliente-create-modal');
     const openCreateClienteModalBtn = document.getElementById('open-create-cliente-modal-btn');
