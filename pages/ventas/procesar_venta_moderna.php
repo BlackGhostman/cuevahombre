@@ -47,8 +47,15 @@ try {
     }
 
     // 3. Actualizar montos de caja
-    $sentencia_caja = $base_de_datos->prepare("CALL u876327316_peluqueria.ActualizarMontosCaja(?, ?);");
-    $sentencia_caja->execute([$total_venta, $id_sucursal]);
+    if ($id_metodo_pago == 1) { // Asumiendo que 1 es Efectivo
+        $sql_update_caja = "UPDATE caja SET monto = monto + ?, Monto_Efectivo = Monto_Efectivo + ? WHERE estado = 'abierto' AND Id_Sucursal = ?";
+        $sentencia_caja = $base_de_datos->prepare($sql_update_caja);
+        $sentencia_caja->execute([$total_venta, $total_venta, $id_sucursal]);
+    } else { // Otros métodos de pago
+        $sql_update_caja = "UPDATE caja SET monto = monto + ?, Monto_NoContado = Monto_NoContado + ? WHERE estado = 'abierto' AND Id_Sucursal = ?";
+        $sentencia_caja = $base_de_datos->prepare($sql_update_caja);
+        $sentencia_caja->execute([$total_venta, $total_venta, $id_sucursal]);
+    }
 
     $base_de_datos->commit();
 
