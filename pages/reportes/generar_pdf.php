@@ -77,7 +77,7 @@ $num_pedido=$_GET['num_pedido'];
     }
   </style>
 </head>
-<body onload="window.print();">
+<body>
 
 <?php
 include('../../dist/includes/dbcon.php');

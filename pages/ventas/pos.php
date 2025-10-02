@@ -163,6 +163,22 @@ $cliente_generico = $query_cliente_generico->fetch(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <!-- Modal de Factura -->
+    <div id="invoice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg h-3/4 flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold">Factura</h3>
+                <div>
+                    <button id="print-invoice-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mr-2"><i class="fas fa-print"></i> Imprimir</button>
+                    <button id="close-invoice-modal-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="p-4 flex-grow">
+                <iframe id="invoice-iframe" src="about:blank" class="w-full h-full border-0"></iframe>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Búsqueda de Cliente -->
     <div id="cliente-search-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="bg-white rounded-lg p-8 shadow-xl w-full max-w-md">
@@ -225,6 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const completeSaleBtn = document.getElementById('complete-sale-btn');
     const notificationModal = document.getElementById('notification-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
+    const invoiceModal = document.getElementById('invoice-modal');
+    const closeInvoiceModalBtn = document.getElementById('close-invoice-modal-btn');
+    const printInvoiceBtn = document.getElementById('print-invoice-btn');
+    const invoiceIframe = document.getElementById('invoice-iframe');
     const clienteInput = document.getElementById('cliente');
     const clienteSearchModal = document.getElementById('cliente-search-modal');
     const closeClienteModalBtn = document.getElementById('close-cliente-modal-btn');
@@ -533,7 +553,8 @@ document.addEventListener('DOMContentLoaded', () => {
 .then(data => {
     if(data.success) {
         if (data.id_pedido) {
-            window.open(`../reportes/generar_pdf.php?num_pedido=${data.id_pedido}`, '_blank');
+            invoiceIframe.src = `../reportes/generar_pdf.php?num_pedido=${data.id_pedido}`;
+            invoiceModal.classList.remove('hidden');
         }
         notificationModal.classList.remove('hidden');
     } else {
@@ -549,6 +570,19 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModalBtn.addEventListener('click', () => {
         notificationModal.classList.add('hidden');
         resetSale();
+    });
+
+    closeInvoiceModalBtn.addEventListener('click', () => {
+        invoiceModal.classList.add('hidden');
+        invoiceIframe.src = 'about:blank'; // Limpiar el iframe
+    });
+
+    printInvoiceBtn.addEventListener('click', () => {
+        const iframeWindow = invoiceIframe.contentWindow;
+        if (iframeWindow) {
+            iframeWindow.focus();
+            iframeWindow.print();
+        }
     });
 
     renderProducts(products);
