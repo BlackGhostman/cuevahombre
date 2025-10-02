@@ -3,6 +3,8 @@ include '../php/conexion.php';
 
 @session_start();
 
+date_default_timezone_set('America/Costa_Rica');
+
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['id'])) {
